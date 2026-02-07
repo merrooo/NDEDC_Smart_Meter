@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ar">
 
@@ -636,3 +637,643 @@
 </body>
 
 </html>
+=======
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>الصيانة</title>
+    <link rel="stylesheet" type="text/css" href="Re_Print_Out_TMaint.css">
+    <link rel="stylesheet" href="print.css" media="print">
+    <!-- for export pdf and make it valid -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <!-- for export excell and make it valid  -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Add icon library -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+</head>
+
+<body>
+    <div id="content-to-export">
+        <div id="page-content" dir="rtl">
+            <!-- ================= SIDEBAR ================= -->
+            <div class="sidebar">
+                <h2>🏠 الصفحة الرئيسية</h2>
+                <div class="search-filters">
+                    <div class="input-container"><select id="mtype" class="text_name_1" aria-label="نوع العداد">
+                            <option value="">نوع العداد ▾</option>
+                        </select></div>
+                    <div class="input-container"><select id="mconn" class="text_name_1" aria-label="نوع التوصيل">
+                            <option value="">نوع التوصيل ▾</option>
+                        </select></div>
+                    <div class="input-container"><select id="keta3" class="text_name_1" aria-label="القطاع">
+                            <option value="">القطاع ▾</option>
+                        </select></div>
+                    <div class="input-container"><select id="handsa" class="text_name_1" aria-label="الهندسة">
+                            <option value="">الهندسة ▾</option>
+                        </select></div>
+                </div>
+            </div>
+
+            <!-- ================= HEADER ================= -->
+            <div class="container-logo">
+                <input type="date" class="text_name_date" id="printtDate" readonly>
+                <h1>تقرير مجمع تسليم صيانة عدادات</h1>
+                <img src="Energy4.png" alt="Logo">
+            </div>
+
+            <!-- ================= CARD ================= -->
+            <div class="cards-wrapper-1">
+                <div class="card_1" id="card_1">
+                    <div class="button-container">
+                        <button id="btnexcell">تصدير إلى Excel</button>
+                        <button id="dlt_btn">تسليم تقرير</button>
+                    </div>
+
+                    <div class="input-container">
+                        <input type="checkbox" id="chkbx" class="chkbx">
+                        <label for="chkbx" class="label_chkbx">تسليم العدادات</label>
+                        <div class="input-group">
+                            <input id="reciver" class="text_name_2" type="text" placeholder=" ">
+                            <span class="label_1">اسم المستلم</span>
+                        </div>
+                        <div class="input-group">
+                            <input id="betaka" class="text_name_2" type="text" placeholder=" ">
+                            <span class="label_1">رقم البطاقة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- // ================= SCRIPT TO ENABLE/DISABLE INPUTS ================= ! -->
+            <script>
+                const chkbox = document.getElementById("chkbx");
+                const reciverInput = document.getElementById("reciver");
+                const betakaInput = document.getElementById("betaka");
+
+                chkbox.addEventListener("change", () => {
+                    const enabled = chkbox.checked;
+                    reciverInput.disabled = !enabled;
+                    betakaInput.disabled = !enabled;
+
+                    // Optional: add a visual effect
+                    if (enabled) {
+                        reciverInput.classList.add("active-card-input");
+                        betakaInput.classList.add("active-card-input");
+                    } else {
+                        reciverInput.classList.remove("active-card-input");
+                        betakaInput.classList.remove("active-card-input");
+                    }
+                });
+
+            </script>
+
+            <!-- ================= TABLE ================= -->
+            <div class="table-wrapper">
+                <div class="table-container">
+                    <table id="dataTable" border="2">
+                        <thead>
+                            <tr>
+                                <th>رقم العداد</th>
+                                <th>نوع العداد</th>
+                                <th>نوع التوصيل</th>
+                                <th>سنة الصنع</th>
+                                <th>القراءة قبل الفحص</th>
+                                <th>قوة العداد</th>
+                                <th>القطاع</th>
+                                <th>الهندسة</th>
+                                <th>سبب الرفع</th>
+                                <th>تاريخ الرفع الهندسة</th>
+                                <th>تاريخ دخول الصيانة</th>
+                                <th>تاريخ صيانة العدادات</th>
+                                <th>تقرير الصيانة</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🧭 Scroll Up/Down Buttons -->
+    <div class="scroll-buttons">
+        <button id="scrollUp" title="إلى الأعلى">▲</button>
+        <button id="scrollDown" title="إلى الأسفل">▼</button>
+    </div>
+
+    <!-- // -----------------------------------------------🧭 Scroll Up/Down Buttons ------------------------------------------------------------------>
+
+    <script>
+        document.getElementById("scrollUp").addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        document.getElementById("scrollDown").addEventListener("click", () => {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+        });
+    </script>
+
+    <!-- // ------------------------------------------------------Dropdown Menu---------------------------------------------------------------------->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const dropdownButtons = document.querySelectorAll(".dropdown-btn");
+
+            dropdownButtons.forEach((btn) => {
+                btn.addEventListener("click", (event) => {
+                    event.stopPropagation(); // prevent body click handler
+                    const currentDropdown = btn.nextElementSibling;
+
+                    // Close all other dropdowns
+                    document.querySelectorAll(".dropdown-content").forEach((content) => {
+                        if (content !== currentDropdown) {
+                            content.classList.remove("active");
+                        }
+                    });
+
+                    // Toggle the current dropdown
+                    currentDropdown.classList.toggle("active");
+                });
+            });
+
+            // Close all dropdowns when clicking outside
+            document.addEventListener("click", () => {
+                document.querySelectorAll(".dropdown-content").forEach((content) => {
+                    content.classList.remove("active");
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.getElementById('printtDate').value = new Date().toISOString().split('T')[0];
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+        import { getDatabase, ref, get, remove, set } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTSWDR3IvFpzp8UARsClrpwbRtTwr12jA",
+            authDomain: "ndedc-meter-calib.firebaseapp.com",
+            databaseURL: "https://ndedc-meter-calib-default-rtdb.firebaseio.com",
+            projectId: "ndedc-meter-calib",
+            storageBucket: "ndedc-meter-calib.appspot.com",
+            messagingSenderId: "185425429190",
+            appId: "1:185425429190:web:dce85f29eea55ad9f54dc7",
+            measurementId: "G-C6QEKW26MW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+
+        // ------------------------------------------------------ FetchAllDataToTable ------------------------------------------------------
+        let allData = [];
+
+        async function fetchAllDataToTable() {
+            try {
+                const dbRef = ref(db, "Archive_Maint"); // ✅ Removed extra space
+                const snapshot = await get(dbRef);
+
+                allData = [];
+                const mtypeSet = new Set();
+                const mconnSet = new Set();
+                const keta3Set = new Set();
+                const handsaSet = new Set();
+
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        const d = childSnapshot.val().otherdata || {};
+                        allData.push(d);
+                        if (d.Mtype) mtypeSet.add(d.Mtype);
+                        if (d.Connection) mconnSet.add(d.Connection);
+                        if (d.Keta3) keta3Set.add(d.Keta3);
+                        if (d.Handsa) handsaSet.add(d.Handsa);
+                    });
+                }
+
+                fillDropdown("mtype", mtypeSet, "نوع العداد ");
+                fillDropdown("mconn", mconnSet, "نوع التوصيل ");
+                fillDropdown("keta3", keta3Set, "القطاع ");
+                fillDropdown("handsa", handsaSet, "الهندسة ");
+
+                renderTable(allData);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                shakeContainer();
+            }
+        }
+
+        function fillDropdown(id, set, label) {
+            const select = document.getElementById(id);
+            select.innerHTML = `<option value="">${label}</option>`;
+            set.forEach(val => {
+                const option = document.createElement("option");
+                option.value = val;
+                option.textContent = val;
+                select.appendChild(option);
+            });
+        }
+
+        function renderTable(filteredData) {
+            const tableBody = document.querySelector("#dataTable tbody");
+            tableBody.innerHTML = "";
+            if (!filteredData.length) {
+                shakeContainer();
+                tableBody.innerHTML = `<tr><td colspan="12">❌ لا توجد بيانات مطابقة.</td></tr>`;
+                return;
+            }
+            filteredData.forEach(d => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${d.MNO || ""}</td>
+                    <td>${d.Mtype || ""}</td>
+                    <td>${d.Connection || ""}</td>
+                    <td>${d.YEAR || ""}</td>
+                    <td>${d.MREADING || ""}</td>
+                    <td>${d.MPower || ""}</td>
+                    <td>${d.Keta3 || ""}</td>
+                    <td>${d.Handsa || ""}</td>
+                    <td>${d.Removingfor || ""}</td>
+                    <td>${d.Uploaddate || ""}</td>
+                    <td>${d.Enter_Maint_Date || ""}</td>
+                    <td>${d.Maint_Date || ""}</td>
+                    <td>${d.Mremovingfor || ""}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function filterAndRender() {
+            const mtype = document.getElementById("mtype").value;
+            const mconn = document.getElementById("mconn").value;
+            const keta3 = document.getElementById("keta3").value;
+            const handsa = document.getElementById("handsa").value;
+
+            let filtered = allData.filter(d => {
+                return (!mtype || d.Mtype === mtype)
+                    && (!mconn || d.Connection === mconn)
+                    && (!keta3 || d.Keta3 === keta3)
+                    && (!handsa || d.Handsa === handsa);
+            });
+            renderTable(filtered);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // attach change listeners so dropdowns filter the table
+            ["mtype", "mconn", "keta3", "handsa"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener("change", filterAndRender);
+            });
+
+            fetchAllDataToTable();
+        });
+
+        // ------------------------------------------------------ AddModifyArchiveData (bulk) ------------------------------------------------------>
+        async function AddModifyArchiveData() {
+            const reciverEl = document.getElementById("reciver");
+            const betakaEl = document.getElementById("betaka");
+            const reciver1 = (reciverEl?.value || "").trim();
+            const betaka1 = (betakaEl?.value || "").trim();
+
+            if (!reciver1 || !betaka1) {
+                alert("❌ الرجاء تفعيل واستكمال بيانات تسليم العدادات!");
+                shakeContainer();
+                return false;
+            }
+
+            const tableRows = document.querySelectorAll("#dataTable tbody tr");
+            if (tableRows.length === 0) {
+                alert("❌ لا توجد بيانات للحفظ!");
+                return false;
+            }
+
+            const currentDate = document.getElementById("printtDate")?.value || "";
+
+            // ✅ Ask once before saving
+            if (!confirm("⚠️ هل أنت متأكد من تسليم جميع العدادات ")) {
+                return false;
+            }
+
+            try {
+                for (const row of tableRows) {
+                    const datatable = {
+                        MNO: row.cells[0]?.textContent.trim(),
+                        Mtype: row.cells[1]?.textContent.trim(),
+                        Connection: row.cells[2]?.textContent.trim(),
+                        YEAR: row.cells[3]?.textContent.trim(),
+                        MREADING: row.cells[4]?.textContent.trim(),
+                        MPower: row.cells[5]?.textContent.trim(),
+                        Keta3: row.cells[6]?.textContent.trim(),
+                        Handsa: row.cells[7]?.textContent.trim(),
+                        Removingfor: row.cells[8]?.textContent.trim(),
+                        Uploaddate: row.cells[9]?.textContent.trim(),
+                        Enter_Maint_Date: row.cells[10]?.textContent.trim(),
+                        Maint_Date: row.cells[11]?.textContent.trim(),
+                        Mremovingfor: row.cells[12]?.textContent.trim(),
+                    };
+
+                    const mnoValue = datatable.MNO;
+                    if (!mnoValue) continue;
+
+                    const data = {
+                        otherdata: {
+                            Reciver1: reciver1,
+                            Betaka1: betaka1,
+                            CurrentDate: currentDate
+                        },
+                        datatable: datatable
+                    };
+
+                    await set(ref(db, "Reciever_Maint/" + mnoValue), data);
+                }
+
+                return true;
+            } catch (err) {
+                console.error(err);
+                alert("❌ حدث خطأ أثناء الحفظ: " + err.message);
+                shakeContainer();
+                return false;
+            }
+        }
+
+        // ------------------------------------------------------ DeleteMeterData (bulk) ------------------------------------------------------>
+        async function DeleteMeterData() {
+            const password = prompt("🔑 الرجاء إدخال كلمة المرور لحذف البيانات المعروضة في الجدول فقط:");
+            const correctPassword = "123";
+
+            if (password !== correctPassword) {
+                alert("❌ كلمة المرور غير صحيحة. لا يمكن تنفيذ الحذف.");
+                shakeContainer();
+                return;
+            }
+
+            const tableRows = document.querySelectorAll("#dataTable tbody tr");
+            if (tableRows.length === 0) {
+                alert("❌ لا توجد بيانات معروضة للحذف.");
+                shakeContainer();
+                return;
+            }
+
+            try {
+                for (const row of tableRows) {
+                    const mnoValue = row.cells[0]?.textContent.trim();
+                    if (!mnoValue) continue;
+
+                    await remove(ref(db, "Maint/" + mnoValue));
+                }
+
+                await fetchAllDataToTable();
+            } catch (error) {
+                alert("❌ حدث خطأ أثناء الحذف: " + error.message);
+                shakeContainer();
+                console.error(error);
+            }
+        }
+
+        // ------------------------------------------------------button----------------------------------------------------------------->
+
+        function exportTableToExcelWithTitleAndRowCount(tableID, filename = 'تقرير الصيانة.xlsx') {
+            const table = document.getElementById(tableID);
+            const rows = table.rows;
+
+            const data = [];
+            let filledRowCount = 0;
+            const columnCount = rows[0].cells.length;
+
+            // Get filter values for هندسة and قطاع (actual values, not label)
+            const handsaSelect = document.getElementById("handsa");
+            const handsa = handsaSelect.options[handsaSelect.selectedIndex].value || "";
+            const keta3Select = document.getElementById("keta3");
+            const keta3 = keta3Select.options[keta3Select.selectedIndex].value || "";
+            const today = new Date().toISOString().split('T')[0];
+
+            // 1. Title row (centered)
+            const titleRow = new Array(columnCount).fill('');
+            titleRow[0] = '📋 تقرير عدادات الصيانة';
+            data.push(titleRow);
+
+            // 2. Info row: right هندسة, next قطاع, left التاريخ
+            const infoRow = new Array(columnCount).fill('');
+            infoRow[0] = handsa;
+            infoRow[1] = keta3;
+            infoRow[columnCount - 1] = today;
+            data.push(infoRow);
+
+            // 3. Table header row
+            const headerRow = [];
+            for (let j = 0; j < columnCount; j++) {
+                headerRow.push(rows[0].cells[j].innerText || rows[0].cells[j].textContent);
+            }
+            data.push(headerRow);
+
+            // 4. Data rows
+            for (let i = 1; i < rows.length; i++) {
+                const row = [];
+                let hasValue = false;
+                for (let j = 0; j < columnCount; j++) {
+                    const cellValue = rows[i].cells[j].innerText || rows[i].cells[j].textContent;
+                    row.push(cellValue);
+                    if (cellValue.trim() !== '') {
+                        hasValue = true;
+                    }
+                }
+                data.push(row);
+                if (hasValue) filledRowCount++;
+            }
+
+            // 5. Total row
+            const totalRow = new Array(columnCount).fill('');
+            totalRow[0] = '✅ اجمالي العدادات ';
+            totalRow[columnCount - 1] = filledRowCount.toString();
+            data.push(totalRow);
+
+            // 6. Create worksheet
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+            worksheet['!merges'] = [
+                // Merge title row
+                { s: { r: 0, c: 0 }, e: { r: 0, c: columnCount - 1 } },
+                // Merge هندسة and قطاع (info row)
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } },
+                // Merge date cell (info row)
+                { s: { r: 1, c: columnCount - 1 }, e: { r: 1, c: columnCount - 1 } },
+                // Merge total row label
+                { s: { r: data.length - 1, c: 0 }, e: { r: data.length - 1, c: columnCount - 2 } }
+            ];
+
+            // 7. Optional styling (only works with some viewers)
+            const titleCell = XLSX.utils.encode_cell({ r: 0, c: Math.floor(columnCount / 2) });
+            worksheet[titleCell].s = {
+                font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "2563eb" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            };
+
+            const handsaCell = XLSX.utils.encode_cell({ r: 1, c: 0 });
+            worksheet[handsaCell].s = {
+                font: { bold: true, color: { rgb: "2563eb" } },
+                alignment: { horizontal: "right" }
+            };
+
+            const keta3Cell = XLSX.utils.encode_cell({ r: 1, c: 1 });
+            worksheet[keta3Cell].s = {
+                font: { bold: true, color: { rgb: "2563eb" } },
+                alignment: { horizontal: "right" }
+            };
+
+            const dateCell = XLSX.utils.encode_cell({ r: 1, c: columnCount - 1 });
+            worksheet[dateCell].s = {
+                font: { bold: true, color: { rgb: "2563eb" } },
+                alignment: { horizontal: "left" }
+            };
+
+            const totalLabelCell = XLSX.utils.encode_cell({ r: data.length - 1, c: 0 });
+            worksheet[totalLabelCell].s = {
+                font: { bold: true },
+                fill: { fgColor: { rgb: "DDDDDD" } },
+                alignment: { horizontal: "center" }
+            };
+
+            const totalValueCell = XLSX.utils.encode_cell({ r: data.length - 1, c: columnCount - 1 });
+            worksheet[totalValueCell].s = {
+                font: { bold: true },
+                fill: { fgColor: { rgb: "FFFFCC" } },
+                alignment: { horizontal: "center" }
+            };
+
+            // 8. Set RTL direction (for supported viewers)
+            worksheet['!rtl'] = true;
+
+            // 9. Export
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'تقرير صيانة العدادات');
+            XLSX.writeFile(workbook, filename);
+
+        }
+
+        // ------------------------------------------------------ Show/Hide Sidebar ------------------------------------------------------>
+
+        function hideall() {
+            const items = [
+                document.querySelector(".sidebar"),
+                document.getElementById("Print_btn"),
+                document.getElementById("btnexcell"),
+                document.getElementById("dlt_btn"),
+            ];
+
+            items.forEach(el => {
+                if (el) el.style.display = "none";
+            });
+        }
+
+        function showall() {
+            const items = [
+                document.querySelector(".sidebar"),
+                document.getElementById("Print_btn"),
+                document.getElementById("btnexcell"),
+                document.getElementById("dlt_btn"),
+            ];
+
+            items.forEach(el => {
+                if (el) el.style.display = "block";
+            });
+        }
+
+
+        // ------------------------------------------------------ Delete Button Handler with PDF before delete ------------------------------------------------------>
+
+        const btnDelete = document.getElementById('dlt_btn');
+        if (btnDelete) {
+            btnDelete.addEventListener('click', async () => {
+
+                // ------------------------------------------------------------------
+                // 0️⃣ FIRST: CHECK EVERYTHING IS OK BEFORE PDF OR DELETE
+                // ------------------------------------------------------------------
+                const added = await AddModifyArchiveData();
+                if (!added) {
+                    console.log("❌ البيانات غير مكتملة – لن يتم طباعة PDF أو الحذف.");
+                    return; // stop everything
+                }
+
+                // ------------------------------------------------------------------
+                // 1️⃣ DOWNLOAD PDF
+                // ------------------------------------------------------------------
+                const element = document.getElementById('page-content');
+
+                const opt = {
+                    margin: [1, 1, -75, -12],
+                    filename: 'Meter_Maintainance_Report.pdf',
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        letterRendering: true
+                    },
+                    jsPDF: {
+                        unit: 'px',
+                        format: [1123, 844],
+                        orientation: 'landscape'
+                    }
+                };
+
+                hideall();
+
+                const originalTransform = element.style.transform;
+                const originalOrigin = element.style.transformOrigin;
+
+                element.style.transformOrigin = 'top center';
+                element.style.transform = 'scale(0.80)';
+
+                try {
+                    await html2pdf().set(opt).from(element).save();
+                } catch (error) {
+                    console.error("Error while generating PDF:", error);
+                } finally {
+                    element.style.transform = originalTransform;
+                    element.style.transformOrigin = originalOrigin;
+                    showall();
+                }
+
+                // ------------------------------------------------------------------
+                // 2️⃣ NOW DELETE THE METER
+                // ------------------------------------------------------------------
+                await DeleteMeterData();
+
+                // ------------------------------------------------------------------
+                // 3️⃣ FINALLY REFRESH ALL DATA
+                // ------------------------------------------------------------------
+                if (typeof FetchAllData === "function") {
+                    await FetchAllData();
+                }
+
+                console.log("✔ العملية تمت بالكامل: PDF + أرشفة + حذف + تحديث الجدول");
+            });
+        }
+
+        /* -----------------------------------SHAKE FUNCTION----------------------------------- */
+
+        function shakeContainer() {
+            const items = ["chkbx", "reciver", "betaka"]; // IDs you want to shake
+
+            items.forEach(id => {
+                const box = document.getElementById(id);
+                if (box) {
+                    box.classList.add("container-shake");
+                    setTimeout(() => box.classList.remove("container-shake"), 500);
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>
+>>>>>>> 4d595ad2eb1df229ec0e548c3ef361568d45096e
