@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير اجمالي عدادات الصيانة</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="G1_Calib.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+</head>
+
+<body>
+    <main class="app">
+        <div class="right-side">
+
+            <section class="table-top-section">
+                <div class="table-header">
+                    <ion-icon name="list-outline"></ion-icon>
+
+
+                    <div class="modern-dropdown">
+                        <button class="dropdown-btn" id="dropdownBtn">
+                            ▾ اختر الصفحة للانتقال
+                        </button>
+
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <div class="dropdown-group" data-icon="🛠️">الصيانة</div>
+                            <div class="dropdown-item" data-page="Entr_Maint.html">دخول صيانة عداد</div>
+                            <div class="dropdown-item" data-page="Maint.html">صيانة عداد</div>
+                            <div class="dropdown-item" data-page="Edite_Maint.html">تعديل بيانات صيانة عداد</div>
+                            <div class="dropdown-item" data-page="Print_Out_SMaint.html">طباعة تقرير فحص صيانة عداد
+                            </div>
+                            <div class="dropdown-item" data-page="Print_Out_TMaint.html">طباعة تقرير مجمع صيانة عداد
+                            </div>
+                            <div class="dropdown-item" data-page="Re_Print_Out_SMaint.html">إعادة طباعة تقرير فحص صيانة
+                                عداد</div>
+                            <div class="dropdown-item" data-page="Re_Print_Out_TMaint.html">إعادة طباعة تقرير مجمع صيانة
+                                عداد</div>
+
+                            <div class="dropdown-group" data-icon="📑">تقارير الصيانة</div>
+                            <div class="dropdown-item" data-page="R_Entr_Maint.html">تقرير دخول صيانة عداد</div>
+                            <div class="dropdown-item" data-page="R_Maint.html">تقرير صيانة عداد</div>
+
+                            <div class="dropdown-group" data-icon="🗄️">الأرشيف</div>
+                            <div class="dropdown-item" data-page="R_Maint_Archive.html">أرشيف الصيانة</div>
+                            <div class="dropdown-item" data-page="Main_Dashboard.html" data-icon="🏠">الصفحة الرئيسية
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <input type="date" id="current_date" class="calib_date" readonly>
+
+                    <script>
+                        // Get today's date in the format YYYY-MM-DD (required for <input type="date">)
+                        const today = new Date();
+                        const Year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(2, '0'); // Add leading zero if month is single digit
+                        const day = String(today.getDate()).padStart(2, '0'); // Add leading zero if day is single digit
+                        const formattedDate = `${Year}-${month}-${day}`;
+
+                        // Set the value of the input field to today's date
+                        document.getElementById('current_date').value = formattedDate;
+                    </script>
+
+                <div class="table-header-controls">
+                    <input id="searchInput" placeholder="🔍 ابحث في النتائج...">
+                    <button id="exportBtn">
+                        <ion-icon name="download-outline"></ion-icon> تصدير Excel
+                    </button>
+                </div>
+                </div>
+            </section>
+
+            <section class="table-wrapper">
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>م</th>
+                                <th>رقم العداد</th>
+                                <th>نوع العداد</th>
+                                <th>نوع التوصيل</th>
+                                <th>سنة الصنع</th>
+                                <th>القراءة قبل الفحص</th>
+                                <th>القطاع</th>
+                                <th>الهندسة</th>
+                                <th>سبب الرفع</th>
+                                <th>تاريخ الرفع</th>
+                                <th>تقرير فحص الهندسة</th>
+                                <th>تاريخ دخول الصيانة</th>
+                                <th>تقرير الصيانة</th>
+                                <th>تاريخ الصيانة</th>
+                                <th>ملاحظات</th>
+                                <th>حالة الصيانة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="row-counter-dashboard">
+                <div class="dashboard-card">
+                    <h3>عدد السجلات</h3>
+                    <span id="rowCountValue">0</span>
+                </div>
+            </div>
+
+            <div class="scroll-buttons">
+                <button id="scrollUp" class="scroll-btn" aria-label="تمرير لأعلى" title="تمرير لأعلى">
+                    <ion-icon name="chevron-up-outline"></ion-icon>
+                </button>
+                <button id="scrollDown" class="scroll-btn" aria-label="تمرير لأسفل" title="تمرير لأسفل">
+                    <ion-icon name="chevron-down-outline"></ion-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= LEFT SIDE : FILTERS ================= -->
+
+        <div class="left-side">
+            <section class="glass">
+                <div class="header-top">
+                    <div class="logo">
+                        <ion-icon name="construct-outline"></ion-icon>
+                    </div>
+                    <div>
+                        وزارة الكهرباء والطاقة المتجددة<br>
+                        الشركة القابضة لكهرباء مصر<br>
+                        شركة شمال الدلتا لتوزيع الكهرباء
+                    </div>
+                </div>
+
+                <h1 class="title-main">الإدارة العامة لأنظمة العدادات الحديثة</h1>
+
+                <h3>تقرير اجمالي عدادات الصيانة</h3>
+
+                <div class="form-grid">
+                    <select id="mtype" title="نوع العداد">
+                        <option value="">▾ اختر نوع العداد</option>
+                        <option>جلوبال-مسبق</option>
+                        <option>سويدى-مسبق</option>
+                        <option>المصرية-مسبق</option>
+                        <option>اسكرا-مسبق</option>
+                        <option>جيزة باور-مسبق</option>
+                        <option>ميكانيكي</option>
+                        <option>رقمى</option>
+                        <option>عدادات-ذكية</option>
+                        <option>أخرى</option>
+                    </select>
+
+                    <select id="mconn" title="نوع التوصيل">
+                        <option value="">▾نوع التوصيل</option>
+                        <option>أحادي</option>
+                        <option>ثلاثي-مباشر</option>
+                        <option>ثلاثي-غير مباشر</option>
+                    </select>
+
+                    <input id="year" placeholder="سنة الصنع">
+
+                    <select id="keta3" title="القطاع">
+                        <option value="">▾ القطاع</option>
+                        <option>دمياط</option>
+                        <option>شمال-الدقهلية</option>
+                        <option>جنوب-الدقهلية</option>
+                        <option>كفر الشيخ</option>
+                    </select>
+
+                    <select id="handsa" title="الهندسة">
+                        <option value="">▾ اختر الهندسة</option>
+                        <option>هندسة شمال دمياط</option>
+                        <option>هندسة جنوب دمياط</option>
+                        <option>هندسة عزبة البرج</option>
+                        <option>هندسة كفر سعد</option>
+                        <option>هندسة كفر البطيخ</option>
+                        <option>هندسة راس البر</option>
+                        <option>هندسة دمياط الجديدة</option>
+                        <option>هندسة الزرقا</option>
+                        <option>هندسة فارسكور</option>
+                        <option>هندسة الروضة</option>
+                        <option>هندسة الشعراء</option>
+                        <option>هندسة مدينة شربين</option>
+                        <option>هندسة قري شربين</option>
+                        <option>هندسة دكرنس</option>
+                        <option>هندسة جمصة</option>
+                        <option>هندسة قري بلقاس</option>
+                        <option>هندسة مدينة بلقاس</option>
+                        <option>هندسة الستاموني</option>
+                        <option>هندسة بني عبيد</option>
+                        <option>هندسة منية النصر</option>
+                        <option>هندسة ميت سلسيل</option>
+                        <option>هندسة الجمالية</option>
+                        <option>هندسة قري المنزلة</option>
+                        <option>هندسة مدينة المنزلة</option>
+                        <option>هندسة المطرية</option>
+                        <option>هندسة شرق المنصورة</option>
+                        <option>هندسة غرب المنصورة</option>
+                        <option>هندسة طلخا</option>
+                        <option>هندسة نبروه</option>
+                        <option>هندسة قري المنصورة 1</option>
+                        <option>هندسة قري المنصورة 2</option>
+                        <option>هندسة اجا</option>
+                        <option>هندسة مدينة السنبلاوين</option>
+                        <option>هندسة قري السنبلاوين</option>
+                        <option>هندسة تمي الامديد</option>
+                        <option>هندسة مدينة ميت غمر</option>
+                        <option>هندسة قري ميت غمر</option>
+                        <option>هندسة كوم النور</option>
+                        <option>هندسة مدينة كفر الشيخ</option>
+                        <option>هندسة غرب كفر الشيخ</option>
+                        <option>هندسة شرق كفر الشيخ</option>
+                        <option>هندسة قلين</option>
+                        <option>هندسة قرى سيدي سالم</option>
+                        <option>هندسة مدينة سيدي سالم</option>
+                        <option>هندسة الرياض</option>
+                        <option>هندسة مدينة دسوق</option>
+                        <option>هندسة قرى شمال دسوق</option>
+                        <option>هندسة قرى جنوب دسوق</option>
+                        <option>هندسة فوه</option>
+                        <option>هندسة مطوبس</option>
+                        <option>هندسة مدينة الحامول</option>
+                        <option>هندسة قرى الحامول</option>
+                        <option>هندسة بيلا</option>
+                        <option>هندسة بلطيم</option>
+                        <option>هندسة برج البرلس</option>
+                    </select>
+
+                    <select id="removingfor" title="سبب الرفع">
+                        <option value="">▾سبب الرفع</option>
+                        <option>الفحص</option>
+                        <option>الصيانة</option>
+                        <option>الهدم والبناء</option>
+                        <option>تصفية مشترك</option>
+                        <option>زيادة قدرة</option>
+                        <option>احلال رباعي</option>
+                        <option>تنازل</option>
+                        <option>خطة احلال</option>
+                        <option>احلال عدم سداد</option>
+                    </select>
+
+                    <select id="mremovingfor" title="تقرير الهندسة">
+                        <option value="">▾تقرير الهندسة</option>
+                        <option>عطل بالبطارية ارسالة للشركة الموردة للصيانة</option>
+                        <option>قارىء الكروت لا يعمل ارسالة للشركة الموردة للصيانة</option>
+                        <option>العداد لا يقبل الشحن ارسالة للشركة الموردة للصيانة</option>
+                        <option>العداد لا يقوم بالتوصيل ارسالة للشركة الموردة للصيانة</option>
+                        <option>الشاشة عاطلة ارسالة للشركة الموردة للصيانة</option>
+                        <option>العداد يحتاج للتهيئة ارسالة للشركة الموردة للصيانة</option>
+                        <option>تقرير فحص للعداد من قبل الشركة الموردة</option>
+                        <option>تلف بجسم/روزتة العداد ارسالة للشركة الموردة للصيانة</option>
+                        <option>زيادة قدرة ارسالة للشركة الموردة للصيانة</option>
+                        <option>بحث مديونية بالعداد ارسالة للشركة الموردة للصيانة</option>
+                        <option>العداد محترق ارسالة للشركة الموردة للصيانة</option>
+                        <option>العداد لا يعمل ارسالة للشركة الموردة للصيانة</option>
+                        <option>لمبة التلاعب تعمل باستمرار ارسالة للشركة الموردة للصيانة</option>
+                        <option>العداد يعمل بدون شحن ارسالة للشركة الموردة للصيانة</option>
+                        <option>العداد لا يسجل الاستهلاك ارسالة للشركة الموردة للصيانة</option>
+                        <option>العداد يسجل استهلاك بدون حمل ارسالة للشركة الموردة للصيانة</option>
+                        <option>blocking</option>
+                    </select>
+
+                    <select id="maintreport" title="تقرير الصيانة">
+                        <option value="">▾ اختر تقرير الصيانة</option>
+                        <option>تغيير البطارية</option>
+                        <option>تغيير قارىء الكروت</option>
+                        <option>صيانة / تغيير شاشة العداد</option>
+                        <option>صيانة/ تغيير الريلاى</option>
+                        <option>صيانة / تغيير وحدة الاتصال</option>
+                        <option>صيانة / تغيير البوردة الداخلية للعداد</option>
+                        <option>تهيئة العداد</option>
+                        <option>تغيير روزتة العداد</option>
+                        <option>تغيير جسم العداد</option>
+                        <option>تغيير العداد بالكامل</option>
+                    </select>
+
+                    <div class="date-group">
+                        <input type="date" id="maint_date" placeholder="من تاريخ">
+                        <input type="date" id="maint_date2" placeholder="إلى تاريخ">
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button id="clearBtn" class="secondary">
+                        <ion-icon name="refresh-outline"></ion-icon> تفريغ
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        // ================= FIREBASE CONFIG =================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTSWDR3IvFpzp8UARsClrpwbRtTwr12jA",
+            authDomain: "ndedc-meter-calib.firebaseapp.com",
+            databaseURL: "https://ndedc-meter-calib-default-rtdb.firebaseio.com",
+            projectId: "ndedc-meter-calib",
+            storageBucket: "ndedc-meter-calib.appspot.com",
+            messagingSenderId: "185425429190",
+            appId: "1:185425429190:web:dce85f29eea55ad9f54dc7",
+            measurementId: "G-C6QEKW26MW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // ================= ELEMENTS =================
+        const el = id => document.getElementById(id);
+
+        const tableBody = el('tableBody');
+        const rowCount = el('rowCountValue') || el('rowCount'); // دعم للاسمين المحتملين
+        const searchInput = el('searchInput');
+        const exportBtn = el('exportBtn');
+        const clearBtn = el('clearBtn');
+
+        // Filters
+        const mtype = el('mtype');
+        const mconn = el('mconn');
+        const keta3 = el('keta3');
+        const handsa = el('handsa');
+        const removingfor = el('removingfor');
+        const maintreport = el('maintreport');
+        const mremovingfor = el('mremovingfor');
+        const startDate = el('maint_date');
+        const endDate = el('maint_date2');
+        const yearInput = el('year');
+
+        // ================= DATA STATE =================
+        let allData = [];
+        let filteredData = [];
+
+        // ================= HELPERS =================
+        const formatDate = d => d ? new Date(d).toLocaleDateString("ar-EG") : "---";
+
+        const showToast = (title, icon = 'success') => {
+            if (window.Swal) {
+                Swal.fire({
+                    icon: icon, title: title, toast: true, position: 'top-end',
+                    showConfirmButton: false, timer: 1500, timerProgressBar: true
+                });
+            }
+        };
+
+        // ================= CORE FUNCTIONS =================
+
+        // جلب البيانات مع واجهة تحميل (Loading)
+        async function fetchAllData() {
+            if (!tableBody) return;
+            tableBody.innerHTML = `<tr><td colspan="16" style="text-align:center">جاري تحميل البيانات...</td></tr>`;
+
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'جاري تحديث التقارير...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+            }
+
+            try {
+                const snapshot = await get(ref(db, "Maint"));
+                if (!snapshot.exists()) {
+                    tableBody.innerHTML = `<tr><td colspan="16" style="text-align:center">لا توجد بيانات حالياً</td></tr>`;
+                    if (rowCount) rowCount.textContent = "0";
+                    Swal.close();
+                    return;
+                }
+
+                allData = [];
+                snapshot.forEach(child => {
+                    // دعم الهيكلين: direct data أو inside otherdata
+                    const record = child.val().otherdata || child.val();
+                    allData.push(record);
+                });
+
+                filteredData = [...allData];
+                renderTable();
+                if (window.Swal) Swal.close();
+
+            } catch (error) {
+                console.error("Firebase Error:", error);
+                if (window.Swal) Swal.fire({ icon: 'error', title: 'خطأ في جلب البيانات', text: error.message });
+            }
+        }
+
+        // بناء الجدول بناءً على المصفوفة المفلترة
+        function renderTable() {
+            if (!tableBody) return;
+            tableBody.innerHTML = "";
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="16" style="text-align:center;padding:30px;">لا توجد نتائج تطابق معايير البحث</td></tr>`;
+                if (rowCount) rowCount.textContent = "0";
+                return;
+            }
+
+            let rows = "";
+            filteredData.forEach((d, i) => {
+                // منطق الحالة: إذا كان هناك سبب إعادة تركيب (MRemovingfor) نعتبرها تمت الصيانة
+                const isDone = d.MRemovingfor && d.MRemovingfor.trim() !== "";
+                const statusText = isDone ? "تمت الصيانة" : "قيد الانتظار";
+                const statusColor = isDone ? "#27ae60" : "#f39c12";
+
+                rows += `
+            <tr>
+                <td>${i + 1}</td>
+                <td style="font-weight:bold">${d.MNO || ''}</td>
+                <td>${d.Mtype || ''}</td>
+                <td>${d.Connection || ''}</td>
+                <td>${d.YEAR || ''}</td>
+                <td>${d.MREADING || ''}</td>
+                <td>${d.Keta3 || ''}</td>
+                <td>${d.Handsa || ''}</td>
+                <td>${d.Removingfor || ''}</td>
+                <td>${formatDate(d.Uploaddate)}</td>
+                <td>${d.MRemovingfor || ''}</td>
+                <td>${formatDate(d.Enter_Maint_Date)}</td>
+                <td>${d.Maintreport || ''}</td>
+                <td>${formatDate(d.Maint_Date)}</td>
+                <td>${d.Notes || ''}</td>
+                <td><span class="status">تم الصيانة</span></td>
+            </tr>`;
+            });
+
+            tableBody.innerHTML = rows;
+            if (rowCount) rowCount.textContent = filteredData.length;
+        }
+
+        // منطق الفلترة المتقدمة
+        function applyFilters() {
+            const q = searchInput.value.toLowerCase().trim();
+            const startV = startDate ? startDate.value : "";
+            const endV = endDate ? endDate.value : "";
+            const yearV = yearInput ? yearInput.value.trim() : "";
+
+            filteredData = allData.filter(o => {
+                // 1. بحث برقم العداد
+                const matchesSearch = !q || (o.MNO && o.MNO.toString().toLowerCase().includes(q));
+
+                // 2. فلاتر القوائم المنسدلة (تجاهل الفلتر إذا لم يتم اختيار قيمة)
+                const matchesMtype = !mtype.value || o.Mtype === mtype.value;
+                const matchesConn = !mconn.value || o.Connection === mconn.value;
+                const matchesKeta3 = !keta3.value || o.Keta3 === keta3.value;
+                const matchesHandsa = !handsa.value || o.Handsa === handsa.value;
+                const matchesRem = !removingfor.value || o.Removingfor === removingfor.value;
+
+                // 3. فلاتر تقرير الصيانة وسبب الإعادة (بحث دقيق)
+                const matchesMRem = !mremovingfor.value ||
+                    (o.MRemovingfor && o.MRemovingfor.trim() === mremovingfor.value.trim());
+
+                const matchesMaintRem = !maintreport.value ||
+                    (o.Maintreport && o.Maintreport.trim() === maintreport.value.trim());
+
+                // 4. فلتر سنة الصنع
+                const matchesYear = !yearV || (o.YEAR && o.YEAR.toString().includes(yearV));
+
+                // 5. فلاتر تاريخ الصيانة (النطاق الزمني)
+                const itemDate = o.Maint_Date || "";
+                const matchesStart = !startV || itemDate >= startV;
+                const matchesEnd = !endV || itemDate <= endV;
+
+                return matchesSearch && matchesMtype && matchesConn &&
+                    matchesKeta3 && matchesHandsa && matchesRem &&
+                    matchesMRem && matchesMaintRem && matchesYear &&
+                    matchesStart && matchesEnd;
+            });
+
+            renderTable();
+        }
+
+        // مسح الفلاتر وإعادة عرض الكل
+        function clearFilters() {
+            document.querySelectorAll("select, .left-side input, .search-box input").forEach(input => {
+                if (input.tagName === "SELECT") input.selectedIndex = 0;
+                else input.value = "";
+            });
+
+            filteredData = [...allData];
+            renderTable();
+            showToast("تم مسح جميع الفلاتر", "info");
+        }
+
+        // ================= INITIALIZATION =================
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAllData();
+
+            // ربط أحداث الإدخال (Input)
+            [searchInput, yearInput].forEach(inp => {
+                if (inp) inp.addEventListener('input', applyFilters);
+            });
+
+            // ربط أحداث القوائم والتاريخ (Change)
+            const filterElements = [
+                mtype, mconn, keta3, handsa, removingfor,
+                mremovingfor, maintreport, startDate, endDate
+            ];
+
+            filterElements.forEach(el => {
+                if (el) el.addEventListener('change', applyFilters);
+            });
+
+            if (clearBtn) clearBtn.onclick = clearFilters;
+
+            if (exportBtn) {
+                exportBtn.onclick = () => {
+                    if (typeof exportToExcel === 'function') exportToExcel();
+                    else showToast("وظيفة التصدير غير معرفة", "error");
+                };
+            }
+        });
+
+        /* ================= EXPORT ================= */
+        function exportToExcel() {
+            if (!filteredData.length) {
+                return Swal.fire({
+                    icon: 'warning',
+                    title: 'لا توجد بيانات',
+                    text: 'لا يمكن تصدير جدول فارغ، يرجى التأكد من وجود بيانات أولاً',
+                    confirmButtonColor: '#f39c12'
+                });
+            }
+
+            Swal.fire({
+                title: 'تصدير البيانات',
+                text: "هل تريد تصدير الجدول الحالي إلى ملف Excel؟",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#27ae60',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'نعم',
+                cancelButtonText: 'إلغاء'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const dataToExport = filteredData.map((o, i) => ({
+                        "م": i + 1,
+                        "رقم العداد": o.MNO || "",
+                        "نوع العداد": o.Mtype || "",
+                        "نوع التوصيل": o.Connection || "",
+                        "سنة الصنع": o.YEAR || "",
+                        "القطاع": o.Keta3 || "",
+                        "الهندسة": o.Handsa || "",
+                        "سبب الرفع": o.Removingfor || "",
+                        "تاريخ الرفع": formatDate(o.Uploaddate),
+                        "تقرير فحص الهندسة": o.MRemovingfor || "",
+                        "تاريخ دخول الصيانة": formatDate(o.Enter_Maint_Date),
+                        "تقرير الصيانة": o.Maintreport || "",
+                        "تاريخ الصيانة": formatDate(o.Maint_Date),
+                        "ملاحظات": o.Notes || "",
+                        "حالة الصيانة": o.Maintreport ? "تم الصيانة" : "قيد الانتظار"
+
+                    }));
+
+                    const ws = XLSX.utils.json_to_sheet(dataToExport);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "التقارير");
+                    XLSX.writeFile(wb, `تقرير_الصيانة${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم التصدير!',
+                        text: 'تم تحميل ملف Excel بنجاح',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        /* ================= SCROLL FUNCTIONS ================= */
+        function scrollUp() {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+        function scrollDown() {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth"
+            });
+        }
+
+        // ربط الأزرار بالدوال
+        document.querySelectorAll("#scrollUp").forEach(btn => {
+            btn.addEventListener("click", scrollUp);
+        });
+
+        document.querySelectorAll("#scrollDown").forEach(btn => {
+            btn.addEventListener("click", scrollDown);
+        });
+
+
+        // Dropdown Menu Functionality
+        const btn = document.getElementById("dropdownBtn");
+        const menu = document.getElementById("dropdownMenu");
+
+        btn.addEventListener("click", () => {
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        document.querySelectorAll('.dropdown-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                window.open(page, '_blank'); // فتح في تبويب جديد
+            });
+        });
+
+        // إغلاق عند الضغط خارج القائمة
+        document.addEventListener("click", e => {
+            if (!e.target.closest(".modern-dropdown")) {
+                menu.style.display = "none";
+            }
+        });
+
+
+
+    </script>
+</body>
+
+</html>
