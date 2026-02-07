@@ -1,0 +1,249 @@
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Cairo', 'Poppins', sans-serif;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  color: #1f2937;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: linear-gradient(180deg, #025bad 0%, #a4b8e9 100%);
+  color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  padding: 25px 15px;
+  transition: width 0.3s ease, background 0.3s ease, right 0.3s ease;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.sidebar h2 {
+  font-size: 1.8rem;
+  margin-bottom: 35px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.sidebar a {
+  color: #f9fafb;
+  text-decoration: none;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar .icon {
+  margin-right: 12px;
+  font-size: 1.2rem;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+  padding: 25px 10px;
+}
+
+.sidebar.collapsed a .text {
+  display: none;
+}
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+  display: block;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Main Content */
+.main {
+  flex: 1;
+  padding: 25px;
+  margin-right: 240px;
+  transition: margin-right 0.3s ease;
+}
+
+.sidebar.collapsed~.main {
+  margin-right: 70px;
+}
+
+/* Topbar */
+.topbar {
+  background-color: #77a0fa;
+  padding: 18px 25px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.topbar h1 {
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+/* Cards */
+.cards-container {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.5s ease, max-height 0.5s ease;
+}
+
+.cards-container.show-section {
+  opacity: 1;
+  max-height: 2000px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.card p {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Users Table */
+#usersTableContainer {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.5s ease, max-height 0.5s ease;
+}
+
+#usersTableContainer.show-section {
+  opacity: 1;
+  max-height: 2000px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+}
+
+table th,
+table td {
+  text-align: left;
+  padding: 14px 18px;
+}
+
+table th {
+  background-color: #77a0fa;
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+table tr:hover {
+  background-color: #e5e7eb;
+}
+
+/* Buttons */
+button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width:768px) {
+  .sidebar {
+    width: 70px;
+    padding: 15px 10px;
+    right: -240px;
+  }
+
+  .sidebar.show {
+    right: 0;
+  }
+
+  .sidebar h2 {
+    display: none;
+  }
+
+  .sidebar a {
+    justify-content: center;
+    padding: 10px 0;
+    font-size: 0.9rem;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .main {
+    padding: 15px;
+    margin-right: 0;
+  }
+}

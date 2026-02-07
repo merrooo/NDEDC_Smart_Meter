@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدائرة الديناميكية - جيب التمام في المدخلات</title>
+    <link rel="stylesheet" type="text/css" href="Angles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+
+</head>
+
+<body>
+    <div id="pageOverlay">
+        <div id="loadingSpinner"></div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <div class="main-container">
+        <!-- Navigation Header -->
+        <nav class="main-nav">
+            <div class="nav-brand">
+                <div class="logo">
+                    <ion-icon name="speedometer-outline"></ion-icon>
+                </div>
+                <h2 class="top-right-text">
+                    وزارة الكهرباء والطاقة المتجددة<br>
+                    الشركة القابضة لكهرباء مصر<br>
+                    شركة شمال الدلتا لتوزيع الكهرباء
+                </h2>
+                <h1>الدائرة الديناميكية - جيب التمام</h1>
+            </div>
+
+            <div class="system-type-selector">
+                <input type="date" class="calibdate" id="currentDate" name="currentDate">
+                <span class="system-label">نظام العمل:</span>
+                <div class="modern-select" id="systemTypeSelector">
+                    <div class="select-header" id="selectHeader">
+                        <div class="selected-option">
+                            <div class="option-icon default">
+                                <ion-icon name="speedometer-outline"></ion-icon>
+                            </div>
+                            <div class="option-text">
+                                ▾ اختر الصفحة للانتقال
+                                <div class="option-desc">نظام تحليل الزوايا وجيب التمام</div>
+                            </div>
+                        </div>
+                        <div class="select-arrow">
+                            <ion-icon name="chevron-down-outline"></ion-icon>
+                        </div>
+                    </div>
+
+                    <div class="select-dropdown" id="selectDropdown">
+                        <div class="option-item" data-value="entry" data-href="Main_Dashboard.html"
+                            style="background-color: #0099ff;">
+                            <div class="option-icon calibration">
+                                <ion-icon name="enter-outline"></ion-icon>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-title">الصفحة الرئيسية</div>
+                            </div>
+                        </div>
+
+                        <div class="option-item" data-value="entry" data-href="Munipilation_Report.html">
+                            <div class="option-icon calibration">
+                                <ion-icon name="enter-outline"></ion-icon>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-title">الضبطية</div>
+                            </div>
+                        </div>
+
+                        <div class="option-item" data-value="maintenance" data-href="Add_Loads.html">
+                            <div class="option-icon maintenance">
+                                <ion-icon name="construct-outline"></ion-icon>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-title">اضافة احمال</div>
+                            </div>
+                        </div>
+
+                        <div class="option-item" data-value="circle" data-href="PF.html">
+                            <div class="option-icon default">
+                                <ion-icon name="speedometer-outline"></ion-icon>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-desc">حسابات معامل القدرة</div>
+                            </div>
+                        </div>
+
+                        <div class="option-item" data-value="circle" data-href="Calibrations.html">
+                            <div class="option-icon default">
+                                <ion-icon name="options-outline"></ion-icon>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-desc">حسابات المعايرة</div>
+                            </div>
+                        </div>
+
+                        <div class="option-item" data-value="circle" data-href="M_T_Calculations.html">
+                            <div class="option-icon default">
+                                <ion-icon name="flash-outline"></ion-icon>
+                            </div>
+                            <div class="item-text">
+                                <div class="item-desc">حسابات مفاقيد المحولات - الموتور</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="circle-page">
+            <div class="circle-header">
+                <h1>
+                    <ion-icon name="analytics-outline"></ion-icon>
+                    نظام تحليل الزوايا وجيب التمام
+                </h1>
+                <p>أدخل التيارات والفولتية والزوايا لتحليل دائرة الطاقة ثلاثية الطور</p>
+            </div>
+
+            <div class="circle-content">
+                <!-- Left Panel - Controls -->
+                <div class="circle-controls">
+                    <h3>
+                        <ion-icon name="settings-outline"></ion-icon>
+                        إدخال المعاملات
+                    </h3>
+
+                    <div class="input-grid">
+                        <!-- الزوايا -->
+                        <div class="input-group">
+                            <label><ion-icon name="angle-outline"></ion-icon> الزاوية 1 (θ1)</label>
+                            <input id="theta1" type="number" value="10" min="-180" max="180" step="1">
+                        </div>
+
+                        <div class="input-group">
+                            <label><ion-icon name="angle-outline"></ion-icon> الزاوية 2 (θ2)</label>
+                            <input id="theta2" type="number" value="130" min="-180" max="180" step="1">
+                        </div>
+
+                        <div class="input-group">
+                            <label><ion-icon name="angle-outline"></ion-icon> الزاوية 3 (θ3)</label>
+                            <input id="theta3" type="number" value="250" min="-180" max="180" step="1">
+                        </div>
+
+                        <!-- معامل القدرة -->
+                        <div class="input-group">
+                            <label><ion-icon name="calculator-outline"></ion-icon> معامل القدرة 1 (Pf1)</label>
+                            <input id="pf1" type="number" readonly>
+                        </div>
+
+                        <div class="input-group">
+                            <label><ion-icon name="calculator-outline"></ion-icon> معامل القدرة 2 (Pf2)</label>
+                            <input id="pf2" type="number" readonly>
+                        </div>
+
+                        <div class="input-group">
+                            <label><ion-icon name="calculator-outline"></ion-icon> معامل القدرة 3 (Pf3)</label>
+                            <input id="pf3" type="number" readonly>
+                        </div>
+                    </div>
+
+                    <h3>
+                        <ion-icon name="stats-chart-outline"></ion-icon>
+                        النتائج والتحليل
+                    </h3>
+
+                    <div class="results-grid">
+                        <div class="input-group">
+                            <label><ion-icon name="checkmark-circle-outline"></ion-icon> الزاوية الصحيحة</label>
+                            <input id="correcttheta" type="number" value="10" min="0" max="180" step="1">
+                        </div>
+
+                        <div class="result-item">
+                            <label><ion-icon name="warning-outline"></ion-icon> خطأ المقدار %</label>
+                            <input id="Mtheta" type="text" readonly>
+                        </div>
+
+                        <div class="result-item">
+                            <label><ion-icon name="arrow-up-outline"></ion-icon> خطأ الاستيراد %</label>
+                            <input id="IMtheta" type="text" readonly>
+                        </div>
+
+                        <div class="result-item">
+                            <label><ion-icon name="arrow-down-outline"></ion-icon> خطأ التصدير %</label>
+                            <input id="EXtheta" type="text" readonly>
+                        </div>
+
+                        <div class="input-group">
+                            <label><ion-icon name="flash-outline"></ion-icon> التصدير [kWH]</label>
+                            <input id="EXkwh" type="number" value="50" min="0" step="0.1">
+                        </div>
+
+                        <div class="result-item">
+                            <label><ion-icon name="trending-down-outline"></ion-icon> الفقد [kWH]</label>
+                            <input id="Losses" type="text" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Color Indicators -->
+                    <div class="color-indicators">
+                        <div class="color-item">
+                            <div class="color-box" style="background: gold;"></div>
+                            <span>الفولتية (V)</span>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-box" style="background: blue;"></div>
+                            <span>التيار (I)</span>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-box" style="background: #ff0000;"></div>
+                            <span>الزاوية 1</span>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-box" style="background: #0099ff;"></div>
+                            <span>الزاوية 2</span>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-box" style="background: #00cc44;"></div>
+                            <span>الزاوية 3</span>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="instructions">
+                        <h3><ion-icon name="information-circle-outline"></ion-icon> تعليمات الاستخدام</h3>
+                        <ul>
+                            <li>أدخل الزوايا بين الفولتية والتيارات (θ1, θ2, θ3)</li>
+                            <li>يتم حساب معامل القدرة تلقائياً باستخدام cos(θ)</li>
+                            <li>يمكن تعديل الزاوية الصحيحة للحسابات النظرية</li>
+                            <li>يتم تحديث الرسم البياني تلقائياً عند تغيير القيم</li>
+                            <li>الدائرة تمثل نظام ثلاثي الطور 120° بين الفازات</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Canvas -->
+                <div class="circle-canvas">
+                    <h3>
+                        <ion-icon name="ellipse-outline"></ion-icon>
+                        الرسم البياني الدائري
+                    </h3>
+                    <canvas id="circlePlot" width="600" height="600"></canvas>
+                    <div style="margin-top: 20px; font-size: 0.9rem; color: #666;">
+                        <p>تمثيل بياني لدائرة الطاقة ثلاثية الطور مع إظهار العلاقة الزاوية بين الفولتية والتيارات</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-buttons">
+        <button id="scrollUp" class="scroll-btn" title="إلى الأعلى">
+            <ion-icon name="chevron-up-outline"></ion-icon>
+        </button>
+        <button id="scrollDown" class="scroll-btn" title="إلى الأسفل">
+            <ion-icon name="chevron-down-outline"></ion-icon>
+        </button>
+    </div>
+
+    <script>
+        // =========================================
+        // INITIALIZATION
+        // =========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('currentDate').value = today;
+
+            // Initialize modern dropdown
+            initModernDropdown();
+
+            // Initialize circle
+            initCircle();
+
+            // Scroll buttons
+            document.getElementById('scrollUp').addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            document.getElementById('scrollDown').addEventListener('click', () => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            });
+        });
+
+        // =========================================
+        // MODERN DROPDOWN FUNCTIONS
+        // =========================================
+        function initModernDropdown() {
+            const selectHeader = document.getElementById('selectHeader');
+            const selectDropdown = document.getElementById('selectDropdown');
+            const optionItems = document.querySelectorAll('.option-item');
+
+            selectHeader.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectHeader.classList.toggle('active');
+                selectDropdown.classList.toggle('active');
+            });
+
+            optionItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const href = item.getAttribute('data-href');
+                    if (href && href !== window.location.pathname.split('/').pop()) {
+                        setTimeout(() => {
+                            window.location.href = href;
+                        }, 500);
+                    }
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!selectHeader.contains(e.target) && !selectDropdown.contains(e.target)) {
+                    selectHeader.classList.remove('active');
+                    selectDropdown.classList.remove('active');
+                }
+            });
+        }
+
+        // =========================================
+        // CIRCLE FUNCTIONS
+        // =========================================
+        function initCircle() {
+            const canvas = document.getElementById("circlePlot");
+            const ctx = canvas.getContext("2d");
+            const circleRadius = 250;
+
+            const fixedQuadrants = [0, 120, 240];
+            let currentAngles = [10, 130, 240];
+
+            // Function to draw an arrow
+            function drawArrow(fromX, fromY, toX, toY, color, label) {
+                const headLength = 15;
+                const dx = toX - fromX;
+                const dy = toY - fromY;
+                const angle = Math.atan2(dy, dx);
+
+                ctx.beginPath();
+                ctx.moveTo(fromX, fromY);
+                ctx.lineTo(toX, toY);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Arrow head
+                ctx.beginPath();
+                ctx.moveTo(toX, toY);
+                ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6),
+                    toY - headLength * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6),
+                    toY - headLength * Math.sin(angle + Math.PI / 6));
+                ctx.lineTo(toX, toY);
+                ctx.fillStyle = color;
+                ctx.fill();
+
+                // Label
+                if (label) {
+                    ctx.font = "bold 18px 'Cairo', Arial, sans-serif";
+                    ctx.fillStyle = color;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    const offsetX = 20 * Math.cos(angle);
+                    const offsetY = 20 * Math.sin(angle);
+                    ctx.fillText(label, toX + offsetX, toY + offsetY);
+                }
+            }
+
+            // Function to draw quadrants
+            function drawQuadrants(cx, cy, r) {
+                ctx.strokeStyle = "#e74c3c";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+
+                for (let i = 0; i < 360; i += 90) {
+                    let rad = (i - 90) * Math.PI / 180;
+                    let x = cx + r * Math.cos(rad);
+                    let y = cy + r * Math.sin(rad);
+
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                }
+
+                ctx.setLineDash([]);
+            }
+
+            // Function to draw measuring arc
+            function drawMeasuringArc(cx, cy, vAngDeg, iAngDeg, arcColor, arcLabel) {
+                const start = (vAngDeg - 90) * Math.PI / 180;
+                const end = (iAngDeg - 90) * Math.PI / 180;
+                const arcRadius = 50;
+
+                ctx.setLineDash([8, 6]);
+                ctx.beginPath();
+                ctx.strokeStyle = arcColor;
+                ctx.lineWidth = 4;
+                ctx.arc(cx, cy, arcRadius, start, end, false);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const mid = (start + end) / 2;
+                const tx = cx + (arcRadius + 35) * Math.cos(mid);
+                const ty = cy + (arcRadius + 35) * Math.sin(mid);
+
+                ctx.fillStyle = arcColor;
+                ctx.font = "bold 16px 'Cairo', Arial, sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(arcLabel, tx, ty);
+            }
+
+            // Main draw function
+            function drawCircle() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+
+                // Draw main circle
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, circleRadius, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#2c3e50";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Draw center point
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = "#2c3e50";
+                ctx.fill();
+
+                drawQuadrants(centerX, centerY, circleRadius);
+
+                const arcColors = ["#ff0000", "#0099ff", "#00cc44"];
+
+                // Draw Voltage (Yellow)
+                fixedQuadrants.forEach((angle, i) => {
+                    const rad = (angle - 90) * Math.PI / 180;
+                    const x = centerX + Math.cos(rad) * circleRadius;
+                    const y = centerY + Math.sin(rad) * circleRadius;
+                    drawArrow(centerX, centerY, x, y, "gold", `V${i + 1}`);
+                });
+
+                // Draw Current (Blue) + Arc
+                currentAngles.forEach((theta, i) => {
+                    const vAngle = fixedQuadrants[i];
+                    const iAngle = vAngle + theta;
+
+                    const radI = (iAngle - 90) * Math.PI / 180;
+                    const xI = centerX + Math.cos(radI) * circleRadius;
+                    const yI = centerY + Math.sin(radI) * circleRadius;
+
+                    drawArrow(centerX, centerY, xI, yI, "blue", `I${i + 1}`);
+
+                    drawMeasuringArc(centerX, centerY, vAngle, iAngle, arcColors[i], `θ${i + 1}=${theta}°`);
+                });
+
+                // Draw circle border
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, circleRadius, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#2c3e50";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                updatePF();
+                updatePFCorrect();
+            }
+
+            // Update Power Factor
+            function updatePF() {
+                for (let i = 1; i <= 3; i++) {
+                    const theta = parseFloat(document.getElementById(`theta${i}`).value) || 0;
+                    const pf = Math.cos(theta * Math.PI / 180);
+                    const pfInput = document.getElementById(`pf${i}`);
+                    if (pfInput) {
+                        pfInput.value = pf.toFixed(3);
+
+                        // Color code based on PF value
+                        if (pf >= 0.9) {
+                            pfInput.style.backgroundColor = "#d4edda";
+                            pfInput.style.color = "#155724";
+                            pfInput.style.borderColor = "#c3e6cb";
+                        } else if (pf >= 0.8) {
+                            pfInput.style.backgroundColor = "#fff3cd";
+                            pfInput.style.color = "#856404";
+                            pfInput.style.borderColor = "#ffeaa7";
+                        } else {
+                            pfInput.style.backgroundColor = "#f8d7da";
+                            pfInput.style.color = "#721c24";
+                            pfInput.style.borderColor = "#f5c6cb";
+                        }
+                    }
+                }
+            }
+
+            // Update Correct Power Factor
+            function updatePFCorrect() {
+                const correctAngle = parseFloat(document.getElementById("correcttheta").value) || 0;
+                const pfCorrect = Math.cos(correctAngle * Math.PI / 180) * 3;
+                calculateError(pfCorrect);
+            }
+
+            // Calculate Errors
+            function calculateError(pfCorrect) {
+                let pfValues = [
+                    parseFloat(document.getElementById("pf1").value) || 0,
+                    parseFloat(document.getElementById("pf2").value) || 0,
+                    parseFloat(document.getElementById("pf3").value) || 0
+                ];
+
+                let absPFs = pfValues.map(pf => Math.abs(pf));
+                const sumAbsAll = absPFs.reduce((a, b) => a + b, 0);
+                const M_Error = sumAbsAll === 0 ? 0 : (1 - sumAbsAll / pfCorrect) * 100;
+
+                const positivePFs = pfValues.filter(pf => pf > 0);
+                const sumPositive = positivePFs.reduce((a, b) => a + b, 0);
+                const IM_Error = sumPositive === 0 ? 0 : (1 - sumPositive / pfCorrect) * 100;
+
+                const negativePFs = pfValues.filter(pf => pf < 0);
+                const sumNegative = negativePFs.reduce((a, b) => a + b, 0);
+                const EX_Error = negativePFs.length === 0 ? 0 : (Math.abs(sumNegative) / pfCorrect) * 100;
+
+                // Update error fields
+                document.getElementById("Mtheta").value = M_Error.toFixed(2) + " %";
+                document.getElementById("IMtheta").value = IM_Error.toFixed(2) + " %";
+                document.getElementById("EXtheta").value = EX_Error.toFixed(2) + " %";
+
+                // Color code error fields
+                colorCodeError("Mtheta", M_Error);
+                colorCodeError("IMtheta", IM_Error);
+                colorCodeError("EXtheta", EX_Error);
+
+                // Calculate Losses
+                const EXKWH = parseFloat(document.getElementById("EXkwh").value) || 0;
+                const EX_ErrorSafe = IM_Error || 1;
+                const EXPORTKWH = (Math.abs(EXKWH) / EX_ErrorSafe) * 100;
+
+                const lossesElement = document.getElementById("Losses");
+                if (lossesElement) {
+                    lossesElement.value = EXPORTKWH.toFixed(2) + " kWh";
+
+                    // Color code losses
+                    if (EXPORTKWH < 10) {
+                        lossesElement.style.backgroundColor = "#d4edda";
+                        lossesElement.style.color = "#155724";
+                        lossesElement.style.borderColor = "#c3e6cb";
+                    } else if (EXPORTKWH < 20) {
+                        lossesElement.style.backgroundColor = "#fff3cd";
+                        lossesElement.style.color = "#856404";
+                        lossesElement.style.borderColor = "#ffeaa7";
+                    } else {
+                        lossesElement.style.backgroundColor = "#f8d7da";
+                        lossesElement.style.color = "#721c24";
+                        lossesElement.style.borderColor = "#f5c6cb";
+                    }
+                }
+            }
+
+            // Color code error values
+            function colorCodeError(elementId, errorValue) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+
+                const absError = Math.abs(errorValue);
+                if (absError < 5) {
+                    element.style.backgroundColor = "#d4edda";
+                    element.style.color = "#155724";
+                    element.style.borderColor = "#c3e6cb";
+                } else if (absError < 10) {
+                    element.style.backgroundColor = "#fff3cd";
+                    element.style.color = "#856404";
+                    element.style.borderColor = "#ffeaa7";
+                } else {
+                    element.style.backgroundColor = "#f8d7da";
+                    element.style.color = "#721c24";
+                    element.style.borderColor = "#f5c6cb";
+                }
+            }
+
+            // Setup input listeners
+            function setupInput(index, id) {
+                const input = document.getElementById(id);
+                if (!input) return;
+
+                input.addEventListener("input", () => {
+                    let val = parseFloat(input.value);
+                    val = isNaN(val) ? 0 : Math.max(-180, Math.min(180, val));
+                    input.value = val;
+                    currentAngles[index] = val;
+                    drawCircle();
+
+                    // Show notification
+                    const notification = document.getElementById('notification');
+                    notification.textContent = `تم تحديث الزاوية ${index + 1} إلى ${val}°`;
+                    notification.className = "notification success";
+                    notification.style.display = 'block';
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 2000);
+                });
+
+                // Add step buttons
+                const container = input.parentElement;
+                const btnContainer = document.createElement('div');
+                btnContainer.style.display = 'flex';
+                btnContainer.style.gap = '5px';
+                btnContainer.style.marginTop = '5px';
+
+                const minusBtn = document.createElement('button');
+                minusBtn.innerHTML = '<ion-icon name="remove-outline"></ion-icon>';
+                minusBtn.style.padding = '5px 10px';
+                minusBtn.style.border = '1px solid #ddd';
+                minusBtn.style.borderRadius = '4px';
+                minusBtn.style.cursor = 'pointer';
+                minusBtn.onclick = () => {
+                    input.value = parseFloat(input.value || 0) - 1;
+                    input.dispatchEvent(new Event('input'));
+                };
+
+                const plusBtn = document.createElement('button');
+                plusBtn.innerHTML = '<ion-icon name="add-outline"></ion-icon>';
+                plusBtn.style.padding = '5px 10px';
+                plusBtn.style.border = '1px solid #ddd';
+                plusBtn.style.borderRadius = '4px';
+                plusBtn.style.cursor = 'pointer';
+                plusBtn.onclick = () => {
+                    input.value = parseFloat(input.value || 0) + 1;
+                    input.dispatchEvent(new Event('input'));
+                };
+
+                btnContainer.appendChild(minusBtn);
+                btnContainer.appendChild(plusBtn);
+                container.appendChild(btnContainer);
+            }
+
+            // Setup all inputs
+            setupInput(0, "theta1");
+            setupInput(1, "theta2");
+            setupInput(2, "theta3");
+
+            // Setup correct angle input
+            const correctInput = document.getElementById("correcttheta");
+            if (correctInput) {
+                correctInput.addEventListener("input", () => {
+                    let val = parseFloat(correctInput.value);
+                    val = isNaN(val) ? 0 : Math.max(0, Math.min(180, val));
+                    correctInput.value = val;
+                    drawCircle();
+                });
+
+                // Add step buttons for correct angle
+                const container = correctInput.parentElement;
+                const btnContainer = document.createElement('div');
+                btnContainer.style.display = 'flex';
+                btnContainer.style.gap = '5px';
+                btnContainer.style.marginTop = '5px';
+
+                const minusBtn = document.createElement('button');
+                minusBtn.innerHTML = '<ion-icon name="remove-outline"></ion-icon>';
+                minusBtn.style.padding = '5px 10px';
+                minusBtn.style.border = '1px solid #ddd';
+                minusBtn.style.borderRadius = '4px';
+                minusBtn.style.cursor = 'pointer';
+                minusBtn.onclick = () => {
+                    correctInput.value = parseFloat(correctInput.value || 0) - 1;
+                    correctInput.dispatchEvent(new Event('input'));
+                };
+
+                const plusBtn = document.createElement('button');
+                plusBtn.innerHTML = '<ion-icon name="add-outline"></ion-icon>';
+                plusBtn.style.padding = '5px 10px';
+                plusBtn.style.border = '1px solid #ddd';
+                plusBtn.style.borderRadius = '4px';
+                plusBtn.style.cursor = 'pointer';
+                plusBtn.onclick = () => {
+                    correctInput.value = parseFloat(correctInput.value || 0) + 1;
+                    correctInput.dispatchEvent(new Event('input'));
+                };
+
+                btnContainer.appendChild(minusBtn);
+                btnContainer.appendChild(plusBtn);
+                container.appendChild(btnContainer);
+            }
+
+            // Setup export kwh input
+            const exportInput = document.getElementById("EXkwh");
+            if (exportInput) {
+                exportInput.addEventListener("input", drawCircle);
+            }
+
+            // Initial draw
+            drawCircle();
+
+            // Auto-adjust canvas size on resize
+            window.addEventListener('resize', () => {
+                const canvas = document.getElementById('circlePlot');
+                const container = canvas.parentElement;
+                const maxSize = Math.min(container.clientWidth - 40, 600);
+                canvas.width = maxSize;
+                canvas.height = maxSize;
+                drawCircle();
+            });
+
+            // Trigger initial resize
+            window.dispatchEvent(new Event('resize'));
+        }
+    </script>
+</body>
+
+</html>
