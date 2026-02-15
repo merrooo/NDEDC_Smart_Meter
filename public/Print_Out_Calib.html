@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>الفحص و المعايرة</title>
+    <link rel="stylesheet" type="text/css" href="Print_Out_Calib.css">
+    <!-- for export pdf and make it valid -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <!-- for export excell and make it valid  -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Add icon library -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+
+</html>
+
+<body>
+    <div id="page-content" dir="rtl">
+        <!-- البطاقة الأولى: بيانات العداد -->
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar title -->
+            <h2>🏠 الصفحة الرئيسية</h2>
+
+            <!-- Table container -->
+            <div class="table-container">
+                <form id="dataForm">
+                    <table id="dataTable">
+                        <thead>
+                            <tr class="active-row">
+                                <th>كود العداد</th>
+                                <th>رقم العداد</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data rows dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+
+            <!-- Print button -->
+            <button class="Print_btn" id="Print_btn">💾 تحميل التقرير</button>
+        </div>
+
+        <div class="card_1">
+            <!-- العنوان + التاريخ + لوجو -->
+            <div class="container-logo">
+                <input type="date" class="text_name_date" id="printtDate" readonly name="Date-Reciving">
+                <h1>تقرير فحص عداد بالمعمل الهندسي</h1>
+                <img src="Energy4.png" alt="Energy Logo" class="logo-img">
+            </div>
+            <h1 class="card_title_1">🧾 بيانات العداد</h1>
+
+            <div class="input-container">
+                <input class="text_name_4" readonly id="types" name="Type">
+                <span class="label_1">نوع النظام</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mno" name="meterno">
+                <span class="label_1">رقم العداد</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mco" name="codeno">
+                <span class="label_1">كود المشترك</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mname" name="metername">
+                <span class="label_1">اسم المشترك</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="voltage" name="volt">
+                <span class="label_1">جهد التشغيل</span>
+            </div>
+
+            <div class="input-container">
+                <input type="date" readonly class="text_name_1" id="uploaddate" name="Date-Uploading">
+                <span class="label_1">تاريخ الرفع</span>
+            </div>
+
+            <div class="input-container">
+                <input type="date" readonly class="text_name_1" id="currentDate" name="Date-Uploading">
+                <span class="label_1">تاريخ الفحص</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="accno" name="accountno">
+                <span class="label_1">رقم الحساب</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="place" name="placetype">
+                <span class="label_1">وصف النشاط</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="year" name="yearmade">
+                <span class="label_1">سنة الصنع</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mpower" name="meterpower">
+                <span class="label_1">قوة العداد بالأمبير</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mtype" name="metertype">
+                <span class="label_1">نوع العداد</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mconn" name="meterconnection">
+                <span class="label_1">نوع التوصيل</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="keta3" name="sector">
+                <span class="label_1">القطاع</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="handsa" name="handsasector">
+                <span class="label_1">الهندسة</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="nashattype" name="typeofactivity">
+                <span class="label_1">نوع النشاط</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="removingfor" name="Removing">
+                <span class="label_1">سبب الرفع</span>
+            </div>
+        </div>
+        <!-- البطاقة الثانية: عرض البيانات -->
+        <div class="card_2">
+            <h1 class="card_title_2">📊 بيانات الفحص</h1>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_2" id="mremovingfor" name="MRemoving">
+                <span class="label_1">تقرير فحص الهندسة</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" class="text_name_2" id="mreading" name="mreading">
+                <span class="label_1">القراءة قبل الفحص</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" class="text_name_2" id="mrafcalib" name="mrafcalib">
+                <span class="label_1">القراءة بعد الفحص</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2" id="md" name="md">
+                <span class="label_1">اقصى حمل KW</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2" id="mstat"
+                    name="mstat">
+                <span class="label_1">دائم - مؤقت</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2" id="rosas"
+                    name="rosas">
+                <span class="label_1">حالة الرصاص</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2" id="error"
+                    name="error">
+                <span class="label_1">نسبة الخطأ</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly autocomplete="off" class="text_name_2" id="errperc" name="errperc">
+                <span class="label_1">%</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2 text-right" id="munip"
+                    name="munip">
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2 text-right" id="mgood"
+                    name="mgood">
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2 text-right" id="crab"
+                    name="crab">
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2 text-right"
+                    id="format" name="format">
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2 text-right"
+                    id="maintain" name="maintain">
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly placeholder="-" autocomplete="off" class="text_name_2 text-right" id="reinf"
+                    name="reinf">
+            </div>
+
+            <div class="container-h">
+
+                <!-- Top: Report -->
+                <div class="h5-group">
+                    <h5>تقرير الفحص</h5>
+                    <h5 id="h5_2"></h5>
+                </div>
+
+                <!-- Bottom row: Committee and Approval -->
+                <div class="bottom-row">
+                    <div class="h3-group">
+                        <h3>لجنة الفحص</h3>
+                        <h3 id="h3_2"></h3>
+                        <h3 id="h3_3"></h3>
+                    </div>
+
+                    <div class="h4-group">
+                        <h4>يعتمد</h4>
+                        <h4>مدير عام أنظمة العدادات الحديثة</h4>
+                        <h4>مهندس</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card_images">
+            <h1 class="card_title_2">🖼 صور العداد</h1>
+
+            <!-- رفع الصور -->
+            <div class="upload-section">
+                <label for="imgInput" class="upload-label">
+                </label>
+                <input type="file" id="imgInput" accept="image/*" multiple>
+            </div>
+
+            <!-- عرض الصور -->
+            <div id="imgPreviewCard" class="preview-card-container">
+                <!-- الصور المرفوعة ستظهر هنا -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- // ------------------------------------------------------today time---------------------------------------------------------------------->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('currentDate').value = today;
+            document.getElementById('uploaddate').value = today;
+            document.getElementById('printtDate').value = today;
+        });
+    </script>
+
+    <!-- // ------------------------------------------------------ClearAll---------------------------------------------------------------------->
+    <script>
+        function clearAll() {
+            location.reload();
+        }
+    </script>
+    <!------------------------------------------------------------DataBase------------------------------------------------------------------------->
+    <script type="module">
+        // ✅ Correct Firebase App Initialization
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+        import {
+            getDatabase,
+            ref,
+            get,
+            set,
+            remove,
+            child,
+            update,
+            onValue,
+            push,
+            query
+        } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+        // ------------------------------------------------------Initialize Firebase---------------------------------------------------------------------->
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTSWDR3IvFpzp8UARsClrpwbRtTwr12jA",
+            authDomain: "ndedc-meter-calib.firebaseapp.com",
+            databaseURL: "https://ndedc-meter-calib-default-rtdb.firebaseio.com",
+            projectId: "ndedc-meter-calib",
+            storageBucket: "ndedc-meter-calib.appspot.com",
+            messagingSenderId: "185425429190",
+            appId: "1:185425429190:web:dce85f29eea55ad9f54dc7",
+            measurementId: "G-C6QEKW26MW"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // ------------------------------------------------------FetchAllDataToTable----------------------------------------------------------------->
+        async function fetchAllDataToTable() {
+            try {
+                const db = getDatabase();
+                const dbRef = ref(db, "Calib");
+                const snapshot = await get(dbRef);
+
+                const tableBody = document.querySelector("#dataTable tbody");
+                tableBody.innerHTML = "";
+
+                if (!snapshot.exists()) {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `<td colspan="28">❌ لا توجد بيانات في الأرشيف.</td>`;
+                    tableBody.appendChild(row);
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const d = data.otherdata || {};
+                    const c = data.calibdata || {};
+
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                <td>${d?.MCO || ""}</td>
+                <td>${d?.MNO || ""}</td>
+            `;
+                    tableBody.appendChild(row);
+
+                    // 🖱️ Click on row → fill fields
+                    row.addEventListener("click", () => {
+                        Array.from(tableBody.rows).forEach(r => r.classList.remove("highlight"));
+                        row.classList.add("highlight");
+
+                        // Fill input fields
+                        types.value = d.Type || "";
+                        mno.value = d.MNO || "";
+                        mco.value = d.MCO || "";
+                        mname.value = d.MNAME || "";
+                        voltage.value = d.VOLTAGE || "";
+                        accno.value = d.ACCNO || "";
+                        place.value = d.PLACE || "";
+                        year.value = d.YEAR || "";
+                        mreading.value = d.MREADING || "";
+                        mpower.value = d.MPOWER || "";
+                        mtype.value = d.Mtype || "";
+                        mconn.value = d.Connection || "";
+                        keta3.value = d.Keta3 || "";
+                        handsa.value = d.Handsa || "";
+                        nashattype.value = d.Nashattype || "";
+                        removingfor.value = d.Removingfor || "";
+                        mremovingfor.value = d.Mremovingfor || "";
+                        uploaddate.value = d.Uploaddate || "";
+                        currentDate.value = d.CurrentDate || "";
+                        mrafcalib.value = c.MRAFcalib || "";
+                        md.value = c.MD || "";
+                        mstat.value = c.Mstat || "";
+                        error.value = c.Error || "";
+                        errperc.value = c.Errperc || "";
+                        rosas.value = c.Rosas || "";
+                        munip.value = c.Munip || "";
+                        mgood.value = c.Mgood || "";
+                        crab.value = c.Crab || "";
+                        format.value = c.Format || "";
+                        maintain.value = c.Maintain || "";
+                        reinf.value = c.Reinf || "";
+
+                        // Fill <h3> elements for User_1 and User_2
+                        const h3_2 = document.getElementById("h3_2");
+                        const h3_3 = document.getElementById("h3_3");
+                        h3_2.innerText = "- " + (c.User_1 || "");
+                        h3_3.innerText = "- " + (c.User_2 || "");
+
+                        // Fill <h5> elements for Report_1 and Report_2
+                        const h5_2 = document.getElementById("h5_2");
+                        const h5_3 = document.getElementById("h5_3");
+                        h5_2.innerText = "-" + (c.Notes || c.Notes || "");
+
+                        // ✅ Fill contenteditable div for notes preserving multi-line
+                        const notesDiv = document.getElementById("notes");
+                        if (notesDiv) {
+                            // Replace line breaks in database text with <br> for proper display
+                            notesDiv.innerHTML = (c.Notes || "").replace(/\n/g, "<br>");
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error("Firebase Error:", error);
+                alert("❌ حدث خطأ أثناء جلب البيانات: " + error.message);
+            }
+        }
+
+        // Run automatically when the page loads
+        window.addEventListener("DOMContentLoaded", fetchAllDataToTable);
+
+        // ------------------------------------------------------Print_Pdf----------------------------------------------------------------->
+
+        document.getElementById('Print_btn').addEventListener('click', async () => {
+            const element = document.getElementById('page-content');
+
+            const opt = {
+                margin: [1, 1, -75, -77],
+                filename: 'Meter_Calibration_Report.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: {
+                    scale: 1,
+                    useCORS: true,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: {
+                    unit: 'px',
+                    format: [1123, 844],
+                    orientation: 'landscape'
+                }
+            };
+
+            // Hide table, buttons, sidebar, etc.
+            if (typeof hideall === "function") hideall();
+
+            const originalTransform = element.style.transform;
+            const originalOrigin = element.style.transformOrigin;
+
+            element.style.transformOrigin = 'top center';
+            element.style.transform = 'scale(1)';
+
+            try {
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        html2pdf()
+                            .set(opt)
+                            .from(element)
+                            .save()
+                            .then(resolve)
+                            .catch(console.error);
+                    }, 500);
+                });
+
+                // Restore scaling
+                element.style.transform = originalTransform;
+                element.style.transformOrigin = originalOrigin;
+
+                // Show table, buttons, sidebar again
+                if (typeof showall === "function") showall();
+
+                // Optional delay before redirecting
+                setTimeout(() => {
+                    window.location.href = 'Recived_Calib.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error("Error during PDF save:", error);
+                // Make sure everything is restored even if error occurs
+                if (typeof showall === "function") showall();
+            }
+        });
+
+        // ------------------------------------------------------Hide_Show_Elements-------------------------------------------------------------->
+
+
+        // Function to hide table, buttons, and sidebar
+        function hideall() {
+            const elementsToHide = [
+                document.getElementById('dataTable'),
+                document.getElementById('Print_btn'),
+                document.querySelector(".sidebar"),
+
+            ];
+
+            elementsToHide.forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+        }
+
+        // Function to show the same elements back
+        function showall() {
+            const elementsToShow = [
+                document.getElementById('dataTable'),
+                document.getElementById('Print_btn'),
+                document.querySelector(".sidebar"),
+            ];
+
+            elementsToShow.forEach(el => {
+                if (el) el.style.display = ''; // restore default
+            });
+        }
+
+        // ------------------------------------------------------ Image upload & display in new card
+        const imgInput = document.getElementById("imgInput");
+        const imgPreviewCard = document.getElementById("imgPreviewCard"); // updated
+
+        imgInput.addEventListener("change", function () {
+            // Clear previous images
+            imgPreviewCard.innerHTML = "";
+
+            const files = Array.from(this.files).slice(0, 12); // limit to 12 images
+
+            files.forEach((file, idx) => {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.alt = `image-${idx + 1}`;
+                    img.className = "preview-image";
+
+                    imgPreviewCard.appendChild(img);
+
+                };
+
+                reader.readAsDataURL(file);
+            });
+        });
+
+    </script>
+</body>
+
+</html>

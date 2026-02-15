@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>مرور دوري - أرشيف الزيارات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --bg: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        #customerSearch {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-family: 'Cairo';
+            box-sizing: border-box;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 105%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            z-index: 1000;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .search-item:hover {
+            background: #f0f7ff;
+            color: var(--accent);
+        }
+
+        .customer-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #e1e8ed;
+            border-top: 5px solid var(--accent);
+        }
+
+        .info-item label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .info-item input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Cairo';
+            font-weight: bold;
+        }
+
+        .info-item span {
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            padding: 5px 0;
+        }
+
+        .passing-header {
+            background: #fff9e6;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 1px solid #ffeeba;
+        }
+
+        #passing_date {
+            padding: 10px 20px;
+            border: 2px solid var(--warning);
+            border-radius: 8px;
+            font-family: 'Cairo';
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #eee;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 1000px;
+        }
+
+        table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            font-size: 0.85rem;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .new-input {
+            width: 100px;
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .new-input:focus {
+            border-color: var(--success);
+            outline: none;
+            background: #fafffa;
+        }
+
+        .note-area {
+            width: 100%;
+            min-width: 200px;
+            height: 70px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: 'Cairo';
+            font-size: 0.9rem;
+            resize: vertical;
+            box-sizing: border-box;
+            background: #fdfdfd;
+            transition: all 0.3s;
+        }
+
+        .note-area:focus {
+            border-color: var(--accent);
+            background: white;
+            outline: none;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn-save {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-save:hover {
+            background: #219150;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .section-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-dot {
+            background: var(--success);
+            width: 5px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        /* تنسيق حاوية القائمة المنسدلة */
+        .modern-dropdown {
+            position: relative;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        /* تنسيق الزر الرئيسي */
+        .dropdown-btn {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--accent);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .dropdown-btn:hover {
+            background: var(--accent);
+        }
+
+        /* تنسيق القائمة المخفية */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: none;
+            /* مخفية افتراضياً */
+            z-index: 2000;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            overflow: hidden;
+        }
+
+        /* تنسيق خيارات القائمة */
+        .dropdown-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: 0.2s;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: #f4f7f6;
+            color: var(--accent);
+            padding-right: 25px;
+            /* تأثير حركة عند التمرير */
+        }
+
+        /* كلاس لإظهار القائمة عبر JS */
+        .show {
+            display: block !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="input-group" style="margin-bottom: 0;">
+
+
+            <div class="modern-dropdown">
+                <button class="dropdown-btn" id="dropdownBtn">
+                    <span>🚀 اختر وجهتك للانتقال</span>
+                    <span id="arrow">▾</span>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-item" data-page="MD.html">📊 بيانات كبار المشتركين</div>
+                    <div class="dropdown-item" data-page="MD_Add.html">➕ إضافة مشترك جديد</div>
+                    <div class="dropdown-item" data-page="MD_Pass.html">🔍 تسجيل مرور ميداني</div>
+                    <div class="dropdown-item" data-page="MD_Pass_Dashboard.html">📅 تقرير المرور العام</div>
+                    <div class="dropdown-item" data-page="index.html">📅 الصفحة الرئيسية</div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const btn = document.getElementById('dropdownBtn');
+                    const menu = document.getElementById('dropdownMenu');
+
+                    // 1. فتح وإغلاق القائمة عند الضغط على الزر
+                    btn.addEventListener('click', function (e) {
+                        e.stopPropagation(); // منع انتقال الضغطة للعناصر الأب
+                        menu.classList.toggle('show');
+                    });
+
+                    // 2. التنقل بين الصفحات عند الضغط على أي خيار
+                    const items = document.querySelectorAll('.dropdown-item');
+                    items.forEach(item => {
+                        item.addEventListener('click', function () {
+                            const page = this.getAttribute('data-page');
+                            if (page) {
+                                window.location.href = page;
+                            }
+                        });
+                    });
+
+                    // 3. إغلاق القائمة تلقائياً إذا ضغطت في أي مكان خارجها
+                    window.addEventListener('click', function () {
+                        if (menu.classList.contains('show')) {
+                            menu.classList.remove('show');
+                        }
+                    });
+                });
+            </script>
+
+
+            <h2 style="text-align: center; color: var(--primary);">🔍 تسجيل المرور على كبار المشتركين (MD_Pass)</h2>
+
+            <div class="search-box">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">اسم المشترك:</label>
+                <input type="text" id="customerSearch" placeholder="ابحث عن اسم المشترك هنا..." autocomplete="off">
+                <div id="searchResults" class="search-results"></div>
+            </div>
+
+            <div id="mainContent" class="hidden">
+                <div class="passing-header">
+                    <label>📅 تاريخ المرور الفعلي:</label>
+                    <input type="date" id="passing_date" disabled>
+                </div>
+
+                <div class="section-title">
+                    <div class="section-dot" style="background: var(--accent);"></div>
+                    بيانات المرور الحالية
+                </div>
+
+                <div class="customer-info-grid">
+                    <div class="info-item"><label>اسم المشترك:</label><span id="disp_name"></span></div>
+                    <div class="info-item"><label>القطاع:</label><span id="disp_keta3"></span></div>
+                    <div class="info-item"><label>الهندسة:</label><span id="disp_handsa"></span></div>
+                    <div class="info-item">
+                        <label>معامل القدرة (PF):</label>
+                        <input type="number" step="0.01" id="edit_pf">
+                    </div>
+                    <div class="info-item">
+                        <label>أقصى حمل:</label>
+                        <input type="number" id="edit_max">
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <div class="section-dot"></div>
+                    القراءات الحالية والملاحظات الفنية
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="metersTable">
+                        <thead>
+                            <tr>
+                                <th width="10%">رقم العداد</th>
+                                <th width="15%">المكان / الثابت</th>
+                                <th width="10%">المحولات</th>
+                                <th style="background: #34495e;">السابقة (kWh)</th>
+                                <th style="background: #34495e;">السابقة (kVARh)</th>
+                                <th style="background: #27ae60;">الحالية (kWh)</th>
+                                <th style="background: #27ae60;">الحالية (kVARh)</th>
+                                <th width="25%">ملاحظات فنية </th>
+                            </tr>
+                        </thead>
+                        <tbody id="metersBody"></tbody>
+                    </table>
+                </div>
+
+                <button class="btn-save" onclick="savePassingRecord()">💾 حفظ السجل</button>
+            </div>
+        </div>
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+            import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyCTSWDR3IvFpzp8UARsClrpwbRtTwr12jA",
+                databaseURL: "https://ndedc-meter-calib-default-rtdb.firebaseio.com",
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+
+            let allCustomers = {};
+            let selectedCustomerKey = "";
+
+            async function fetchAllForSearch() {
+                const snapshot = await get(ref(db, 'MD/customers'));
+                if (snapshot.exists()) { allCustomers = snapshot.val(); }
+            }
+
+            const searchInput = document.getElementById('customerSearch');
+            const resultsDiv = document.getElementById('searchResults');
+
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                resultsDiv.innerHTML = '';
+                if (!term) { resultsDiv.style.display = 'none'; return; }
+                let found = false;
+                for (let key in allCustomers) {
+                    if (allCustomers[key].metername.toLowerCase().includes(term)) {
+                        const item = document.createElement('div');
+                        item.className = 'search-item';
+                        item.innerText = allCustomers[key].metername;
+                        item.onclick = () => selectCustomer(key);
+                        resultsDiv.appendChild(item);
+                        found = true;
+                    }
+                }
+                resultsDiv.style.display = found ? 'block' : 'none';
+            });
+
+            window.selectCustomer = function (key) {
+                selectedCustomerKey = key;
+                const data = allCustomers[key];
+                searchInput.value = data.metername;
+                resultsDiv.style.display = 'none';
+
+                document.getElementById('disp_name').innerText = data.metername;
+                document.getElementById('disp_keta3').innerText = data.keta3;
+                document.getElementById('disp_handsa').innerText = data.handsa;
+                document.getElementById('edit_pf').value = data.power_factor || 0;
+                document.getElementById('edit_max').value = data.max_load || 0;
+
+                const tbody = document.getElementById('metersBody');
+                tbody.innerHTML = '';
+
+                for (let mKey in data.meters) {
+                    const meter = data.meters[mKey];
+                    tbody.innerHTML += `
+                    <tr class="meter-row" data-mkey="${mKey}" data-mno="${meter.meternumber}">
+                        <td style="font-weight: bold;">${meter.meternumber}</td>
+                        <td><small>${meter.location || '-'}<br>Const: ${meter.constant}</small></td>
+                        <td><small>V:${meter.vt_ratio}<br>C:${meter.ct_ratio}</small></td>
+                        <td style="background: #f8f9fa; font-weight: bold; color: #2980b9;">${meter.kwh_reading}</td>
+                        <td style="background: #f8f9fa; font-weight: bold; color: #2980b9;">${meter.kvarh_reading}</td>
+                        <td><input type="number" class="new-kwh new-input" placeholder="0"></td>
+                        <td><input type="number" class="new-kvarh new-input" placeholder="0"></td>
+                        <td><textarea class="visit-note note-area" placeholder="أدخل أي ملاحظات فنية..."></textarea></td>
+                    </tr>
+                `;
+                }
+
+                document.getElementById('passing_date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('mainContent').classList.remove('hidden');
+            };
+
+            window.savePassingRecord = async function () {
+                const passingDate = document.getElementById('passing_date').value;
+                if (!passingDate) return Swal.fire("خطأ", "يرجى تحديد تاريخ المرور", "error");
+
+                const rows = document.querySelectorAll('.meter-row');
+                let readingsForPass = {};
+                let updates = {};
+
+                rows.forEach(row => {
+                    const mKey = row.getAttribute('data-mkey');
+                    const newKwh = row.querySelector('.new-kwh').value;
+                    const newKvarh = row.querySelector('.new-kvarh').value;
+                    const note = row.querySelector('.visit-note').value; // جلب الملاحظة من التكست أريا
+
+                    // 1. بيانات الأرشيف التاريخي (MD_Pass)
+                    readingsForPass[mKey] = {
+                        meternumber: row.getAttribute('data-mno'),
+                        kwh: newKwh || 0,
+                        kvarh: newKvarh || 0,
+                        note: note || ""
+                    };
+
+                    // 2. تحديث البيانات الأساسية (MD/customers) للعدادات التي تم إدخال قراءات لها
+                    if (newKwh !== "" || newKvarh !== "") {
+                        const baseRef = `MD/customers/${selectedCustomerKey}/meters/${mKey}`;
+
+                        if (newKwh !== "") updates[`${baseRef}/kwh_reading`] = parseFloat(newKwh);
+                        if (newKvarh !== "") updates[`${baseRef}/kvarh_reading`] = parseFloat(newKvarh);
+
+                        // تحديث الملاحظات الفنية للعداد
+                        updates[`${baseRef}/meternotes`] = note || "";
+
+                        // تحديث تاريخ آخر معاينة للعداد
+                        updates[`${baseRef}/inspection_date`] = passingDate;
+                    }
+                });
+
+                // 3. تحديث بيانات المشترك العامة (معامل القدرة وأقصى حمل)
+                updates[`MD/customers/${selectedCustomerKey}/power_factor`] = document.getElementById('edit_pf').value;
+                updates[`MD/customers/${selectedCustomerKey}/max_load`] = document.getElementById('edit_max').value;
+                updates[`MD/customers/${selectedCustomerKey}/passing_date`] = document.getElementById('passing_date').value;
+
+                // تجهيز كائن السجل التاريخي الكامل
+                const historicalRecord = {
+                    metername: document.getElementById('disp_name').innerText,
+                    visit_date: passingDate,
+                    readings: readingsForPass,
+                    keta3: document.getElementById('disp_keta3').innerText,
+                    handsa: document.getElementById('disp_handsa').innerText,
+                    power_factor: document.getElementById('edit_pf').value,
+                    max_load: document.getElementById('edit_max').value,
+                    timestamp: new Date().getTime()
+                };
+
+                try {
+                    Swal.fire({ title: 'جاري تحديث البيانات ...', didOpen: () => Swal.showLoading() });
+
+                    // حفظ الأرشيف
+                    await set(ref(db, `MD_Pass/${selectedCustomerKey}/${passingDate}`), historicalRecord);
+
+                    // تنفيذ كافة التحديثات في جدول المشتركين الأساسي
+                    for (let path in updates) {
+                        await set(ref(db, path), updates[path]);
+                    }
+
+                    Swal.fire("تم بنجاح", "تم تحديث القراءات، الملاحظات، وتاريخ المعاينة", "success")
+                        .then(() => location.reload());
+                } catch (e) {
+                    console.error(e);
+                    Swal.fire("خطأ في الحفظ", e.message, "error");
+                }
+            };
+
+            fetchAllForSearch();
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <script src="gatekeeper.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم - نظام الفحص والصيانة</title>
+
+  <link rel="stylesheet" type="text/css" href="Main_Dashboard.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="content-area">
+  <div id="pageOverlay">
+    <div id="loadingSpinner" class="spinner"></div>
+  </div>
+
+  <nav class="main-nav">
+    <div class="nav-brand">
+      <div class="logo">
+        <ion-icon name="speedometer-outline"></ion-icon>
+      </div>
+
+      <div class="brand-text">
+        <h2 class="top-right-text">
+          وزارة الكهرباء والطاقة المتجددة<br>
+          الشركة القابضة لكهرباء مصر<br>
+          شركة شمال الدلتا لتوزيع الكهرباء
+        </h2>
+      </div>
+
+      <div class="dashboard-title">
+        <h1>لوحة تحكم نظام الفحص والصيانة</h1>
+      </div>
+    </div>
+
+    <button id="showDailyStatsBtn" class="show-stats-btn">عرض إحصائيات الفحص اليومية</button>
+    <label class="dark-toggle">
+      <input type="checkbox" onclick="document.body.classList.toggle('dark-mode')">
+      🌙
+    </label>
+
+    <div class="system-type-selector">
+      <div class="time-box">
+        <ion-icon name="time-outline"></ion-icon>
+        <span id="currentTime" class="current-time"></span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-container">
+    <div class="top-overview-grid">
+      <section class="stats-section">
+        <div class="section-header">
+          <h3><ion-icon name="stats-chart-outline"></ion-icon> الإحصائيات الرئيسية</h3>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card calibration">
+            <div class="stat-icon"><ion-icon name="search-outline"></ion-icon></div>
+            <div class="stat-content">
+              <h4>الفحص والمعايرة</h4>
+              <div class="stat-numbers">
+                <div class="stat-item"><span class="stat-label">المستلمة</span><span class="stat-value"
+                    id="receivedMeters">0</span></div>
+                <div class="stat-item"><span class="stat-label">المنتهية</span><span class="stat-value"
+                    id="calibratedMeters">0</span></div>
+                <div class="stat-item"><span class="stat-label">المتبقية</span><span class="stat-value"
+                    id="remainingMeters">0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card maintenance">
+            <div class="stat-icon"><ion-icon name="construct-outline"></ion-icon></div>
+            <div class="stat-content">
+              <h4>الصيانة</h4>
+              <div class="stat-numbers">
+                <div class="stat-item"><span class="stat-label">المستلمة</span><span class="stat-value"
+                    id="receivedMaintMeters">0</span></div>
+                <div class="stat-item"><span class="stat-label">المنتهية</span><span class="stat-value"
+                    id="calibratedMaintMeters">0</span></div>
+                <div class="stat-item"><span class="stat-label">المتبقية</span><span class="stat-value"
+                    id="remainingMaintMeters">0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card scrap">
+            <div class="stat-icon"><ion-icon name="trash-outline"></ion-icon></div>
+            <div class="stat-content">
+              <h4>نظام التكهين</h4>
+              <div class="stat-numbers">
+                <div class="stat-item"><span class="stat-label">إجمالي التكهين</span><span class="stat-value"
+                    id="totalTakheen">0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card delivery">
+            <div class="stat-icon"><ion-icon name="checkmark-done-circle-outline"></ion-icon></div>
+            <div class="stat-content">
+              <h4>تسليم الهندسات[ فحص-صيانة]</h4>
+              <div class="stat-numbers">
+                <div class="stat-item"><span class="stat-label">تسليم فحص</span><span class="stat-value"
+                    id="recCalibValue">0</span></div>
+                <div class="stat-item"><span class="stat-label">تسليم صيانة</span><span class="stat-value"
+                    id="recMaintValue">0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="chart-section-container">
+        <div class="chart-grid-layout">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h4><ion-icon name="pie-chart-outline"></ion-icon> توزيع الحالات الحالية</h4>
+            </div>
+            <div class="chart-wrapper"><canvas id="statusChart"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <h4><ion-icon name="bar-chart-outline"></ion-icon> مقارنة الاستلام والمنجز</h4>
+            </div>
+            <div class="chart-wrapper"><canvas id="performanceChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="modern-dropdown-section">
+        <div class="section-header">
+          <h3><ion-icon name="grid-outline"></ion-icon> لوحة التحكم والأنظمة</h3>
+        </div>
+
+        <div class="dropdown-container">
+
+          <div class="dropdown-item admin-only">
+            <button class="dropdown-btn smart">
+              <span><ion-icon name="speedometer-outline"></ion-icon> نظام العدادات الذكية</span>
+              <ion-icon name="chevron-down-outline" class="arrow"></ion-icon>
+            </button>
+            <div class="dropdown-content">
+              <a href="Dashboard_Smart.html"><ion-icon name="analytics-outline"></ion-icon> لوحة التحكم</a>
+              <a href="SMART_Added_Mod.html"><ion-icon name="add-circle-outline"></ion-icon> اضافة عدادات</a>
+              <a href="SMART_Map.html"><ion-icon name="map-outline"></ion-icon> بحث بالأحداثيات</a>
+              <a href="SMART_Conv_Cord.html"><ion-icon name="locate-outline"></ion-icon> تحويل الأحداثيات</a>
+              <a href="SMART_R.html"><ion-icon name="document-outline"></ion-icon> التقارير</a>
+              <a href="SMART_Excel.html"><ion-icon name="cloud-download-outline"></ion-icon> تنزيل البيانات</a>
+            </div>
+          </div>
+
+          <div class="dropdown-item admin-only">
+            <button class="dropdown-btn calibration">
+              <span><ion-icon name="search-outline"></ion-icon> نظام الفحص والمعايرة</span>
+              <ion-icon name="chevron-down-outline" class="arrow"></ion-icon>
+            </button>
+            <div class="dropdown-content">
+              <a href="Entr_Calib.html">دخول فحص</a>
+              <a href="Calib.html">فحص عداد</a>
+              <a href="Edite_Calib.html">تعديل بيانات</a>
+              <a href="Print_Out_Calib.html">طباعة تقرير</a>
+              <a href="Recived_Calib.html">تسليم عداد</a>
+            </div>
+          </div>
+
+          <div class="dropdown-item">
+            <button class="dropdown-btn maintenance">
+              <span><ion-icon name="construct-outline"></ion-icon> نظام الصيانة</span>
+              <ion-icon name="chevron-down-outline" class="arrow"></ion-icon>
+            </button>
+            <div class="dropdown-content">
+              <a href="Entr_Maint.html">دخول صيانة</a>
+              <a href="Maint.html">صيانة عداد</a>
+              <a href="R_Maint.html">تقرير صيانة</a>
+              <a href="R_Maint_Archive.html">أرشيف الصيانة</a>
+            </div>
+          </div>
+
+          <div class="dropdown-item admin-only">
+            <button class="dropdown-btn math">
+              <span><ion-icon name="flash-outline"></ion-icon> الحسابات الكهربية</span>
+              <ion-icon name="chevron-down-outline" class="arrow"></ion-icon>
+            </button>
+            <div class="dropdown-content">
+              <a href="Angles.html">تحليل الزوايا</a>
+              <a href="Munipilation_Report.html">الضبطية</a>
+              <a href="Add_Loads.html">اضافة احمال</a>
+              <a href="PF.html">حسابات معامل القدرة</a>
+              <a href="Calibrations.html">حسابات المعايرة</a>
+              <a href="M_T_Calculations.html">حسابات مفاقيد المحولات - الموتور</a>
+              <a href="Research.html">المادة العلمية لمنظومة العدادات الذكية</a>
+              <a href="Spex.html">المواصفات</a>
+              <a href="Tarrifs.html">التشريح</a>
+              <a href="Cables_V.D_Calculator.html">الكابلات-الفقد فى الجهد</a>
+              <a href="TVJ.html">TVJ</a>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTSWDR3IvFpzp8UARsClrpwbRtTwr12jA",
+      authDomain: "ndedc-meter-calib.firebaseapp.com",
+      databaseURL: "https://ndedc-meter-calib-default-rtdb.firebaseio.com",
+      projectId: "ndedc-meter-calib",
+      storageBucket: "ndedc-meter-calib.appspot.com",
+      messagingSenderId: "185425429190",
+      appId: "1:185425429190:web:dce85f29eea55ad9f54dc7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const overlay = document.getElementById("pageOverlay");
+    let statusChart = null;
+    let performanceChart = null;
+
+    function updateTime() {
+      const now = new Date();
+      document.getElementById("currentTime").textContent =
+        now.toLocaleDateString("ar-EG") + " - " + now.toLocaleTimeString("ar-EG");
+    }
+
+    const valCount = snap => (snap && snap.exists()) ? Object.keys(snap.val()).length : 0;
+
+    function processUserStats(calibSnap) {
+      if (!calibSnap || !calibSnap.exists()) return [];
+      const calibRecords = Object.values(calibSnap.val());
+      const usersKeys = ["User_1", "User_2"];
+      const statsMap = {};
+
+      calibRecords.forEach(record => {
+        const userData = record.calibdata || {};
+        const date = userData.CalibDate || "غير محدد";
+        usersKeys.forEach(key => {
+          const name = userData[key];
+          if (name) {
+            const groupKey = `${name}|${date}`;
+            statsMap[groupKey] = (statsMap[groupKey] || 0) + 1;
+          }
+        });
+      });
+
+      return Object.keys(statsMap).map(key => {
+        const [name, date] = key.split("|");
+        return { name, date, count: statsMap[key] };
+      });
+    }
+
+    function updateCharts(ec, c, em, m) {
+      const countC = valCount(c);
+      const countM = valCount(m);
+
+      const ctx1 = document.getElementById("statusChart");
+      if (statusChart) statusChart.destroy();
+      statusChart = new Chart(ctx1, {
+        type: "doughnut",
+        data: {
+          labels: ["فحص مكتمل", "فحص متبقي", "صيانة مكتمل", "صيانة متبقية"],
+          datasets: [{
+            data: [countC, valCount(ec) - countC, countM, valCount(em) - countM],
+            backgroundColor: ["#2ecc71", "#f1c40f", "#3498db", "#e74c3c"]
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#333', font: { family: 'Cairo' } }
+            }
+          }
+        }
+      });
+
+      const ctx2 = document.getElementById("performanceChart");
+      if (performanceChart) performanceChart.destroy();
+      performanceChart = new Chart(ctx2, {
+        type: "bar",
+        data: {
+          labels: ["منظومة الفحص", "منظومة الصيانة"],
+          datasets: [
+            { label: 'المستلم', data: [valCount(ec), valCount(em)], backgroundColor: '#9b59b6' },
+            { label: 'المنجز', data: [countC, countM], backgroundColor: '#2ecc71' }
+          ]
+        },
+        options: {
+          maintainAspectRatio: false,
+          scales: {
+            y: { ticks: { color: '#333' }, grid: { color: '#eee' } },
+            x: { ticks: { color: '#333' } }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#333', font: { family: 'Cairo' } }
+            }
+          }
+        }
+      });
+    }
+
+    async function fetchData() {
+      try {
+        const paths = ["Enter_Calib", "Calib", "Enter_Maint", "Maint", "Takheen", "Reciever_Calib", "Reciever_Maint"];
+        const snapshots = await Promise.all(paths.map(path => get(ref(db, path))));
+        const [ec, c, em, m, t, rc, rm] = snapshots;
+
+        document.getElementById("receivedMeters").textContent = valCount(ec);
+        document.getElementById("calibratedMeters").textContent = valCount(c);
+        document.getElementById("remainingMeters").textContent = valCount(ec) - valCount(c);
+        document.getElementById("receivedMaintMeters").textContent = valCount(em);
+        document.getElementById("calibratedMaintMeters").textContent = valCount(m);
+        document.getElementById("remainingMaintMeters").textContent = valCount(em) - valCount(m);
+        document.getElementById("totalTakheen").textContent = valCount(t);
+        document.getElementById("recCalibValue").textContent = valCount(rc);
+        document.getElementById("recMaintValue").textContent = valCount(rm);
+
+        updateCharts(ec, c, em, m);
+        overlay.style.display = "none";
+      } catch (e) {
+        console.error(e);
+        overlay.style.display = "none";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateTime();
+      setInterval(updateTime, 1000);
+      fetchData();
+      setInterval(fetchData, 60000);
+
+      document.getElementById("showDailyStatsBtn").addEventListener("click", async () => {
+        const calibSnap = await get(ref(db, "Calib"));
+        const stats = processUserStats(calibSnap);
+        const rows = stats.map(u => `
+          <tr class="swal-row">
+            <td>${u.name}</td>
+            <td>${u.count}</td>
+            <td>${u.date}</td>
+          </tr>`).join("");
+
+        Swal.fire({
+          title: "إحصائيات الفحص",
+          html: `
+            <div dir="rtl">
+              <table class="swal-table">
+                <thead>
+                  <tr>
+                    <th>المستخدم</th>
+                    <th>الكمية</th>
+                    <th>التاريخ</th>
+                  </tr>
+                </thead>
+                <tbody>${rows || "<tr><td colspan='3'>لا توجد بيانات</td></tr>"}</tbody>
+              </table>
+            </div>`,
+          background: "#fff",
+          confirmButtonColor: "#3498db",
+          confirmButtonText: "إغلاق",
+          customClass: {
+            title: 'swal-title-custom'
+          }
+        });
+      });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // --- ACCESS CONTROL HIDING LOGIC ---
+      const role = localStorage.getItem("userRole");
+
+      // If the role is 'user', hide all elements marked 'admin-only'
+      if (role === "user") {
+        const adminSections = document.querySelectorAll(".admin-only");
+        adminSections.forEach(section => {
+          section.style.display = "none";
+        });
+
+        // Optional: Hide the "Show Daily Stats" button for users too
+        const statsBtn = document.getElementById("showDailyStatsBtn");
+        if (statsBtn) statsBtn.style.display = "none";
+      }
+      // -----------------------------------
+
+      updateTime();
+      setInterval(updateTime, 1000);
+      fetchData();
+      // ... rest of your existing code
+    });
+
+
+    document.querySelectorAll('.dropdown-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const parent = button.parentElement;
+
+        // إغلاق القوائم الأخرى إذا أردت (اختياري)
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+          if (item !== parent) item.classList.remove('active');
+        });
+
+        // فتح أو إغلاق القائمة الحالية
+        parent.classList.toggle('active');
+      });
+    });
+
+
+  </script>
+</body>
+
+</html>

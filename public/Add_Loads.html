@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Load Manager - Professional Edit</title>
+    <link rel="stylesheet" href="Add_Loads.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+</head>
+
+<body>
+    
+    <label class="dark-toggle" title="تبديل الوضع الداكن">
+        <input id="darkToggle" type="checkbox" oninput="window.toggleDarkMode(this.checked)">
+        <span class="switch" aria-hidden="true"></span>
+        <span class="icon">🌙</span>
+    </label>
+
+    <div class="app-container">
+        <div class="entry-card">
+            <div class="header-section header-flex">
+
+                <h2>⚡ نظام اضافة الأحمال</h2>
+
+                <button class="btn-home" onclick="window.location.href='Main_Dashboard.html'">
+                    ⬅️ الصفحة الرئيسية
+                </button>
+
+                <p>أدخال ألأحمال والقدرات بالوات</p>
+            </div>
+
+            <div class="inputs-grid">
+                <input type="text" id="pName" class="custom-input" placeholder="وصف نوع الحمل">
+                <input type="number" id="pWatt" class="custom-input" placeholder="Watts القدرة بالوات">
+                <input type="number" id="pHP" class="custom-input" placeholder="HP القدرة بالحصان">
+            </div>
+            <div class="main-btns-group">
+                <button class="btn btn-save" onclick="window.quickSave()">💾 إضافة وحفظ</button>
+                <button class="btn btn-view" onclick="window.showDataModal()">👁️ عرض وتعديل البيانات</button>
+            </div>
+        </div>
+
+
+
+        <template id="tableTemplate">
+            <div style="text-align: right; direction: rtl; width: 100%;">
+                <input type="text" id="mSearch" class="custom-input" placeholder="🔍 ابحث عن جهاز محدد بالاسم..."
+                    onkeyup="window.filterModal()">
+
+                <div class="modal-table-container">
+                    <table id="fullTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">وصف نوع الحمل</th>
+                                <th style="width: 20%;">Watts القدرة بالوات</th>
+                                <th style="width: 20%;">HP القدرة بالحصان</th>
+                                <th style="width: 20%;">تعديل/حفظ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-controls">
+                    <button id="prevBtn" class="btn-pagination" onclick="window.prevPage()">⬅️ السابق</button>
+                    <span id="pageInfo" class="page-info">الصفحة 1 من 1</span>
+                    <button id="nextBtn" class="btn-pagination" onclick="window.nextPage()">التالي ➡️</button>
+                </div>
+            </div>
+        </template>
+
+
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+            import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyCTSWDR3IvFpzp8UARsClrpwbRtTwr12jA",
+                authDomain: "ndedc-meter-calib.firebaseapp.com",
+                databaseURL: "https://ndedc-meter-calib-default-rtdb.firebaseio.com",
+                projectId: "ndedc-meter-calib",
+                storageBucket: "ndedc-meter-calib.appspot.com",
+                messagingSenderId: "185425429190",
+                appId: "1:185425429190:web:dce85f29eea55ad9f54dc7"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+
+            // Global variables for pagination
+            let allLoads = [];
+            let filteredLoads = [];
+            let currentPage = 1;
+            const itemsPerPage = 4;
+
+            const w = document.getElementById('pWatt'), h = document.getElementById('pHP');
+            w.oninput = () => h.value = w.value ? (w.value / 746).toFixed(3) : "";
+            h.oninput = () => w.value = h.value ? (h.value * 746).toFixed(3) : "";
+
+            window.quickSave = async function () {
+                const name = document.getElementById('pName');
+                if (!name.value || !w.value) return Swal.fire('تنبيه', 'برجاء إكمال البيانات', 'warning');
+                const snap = await get(ref(db, 'Current_Load_Schedule'));
+                let loads = (snap.exists() && snap.val().loads) ? snap.val().loads : [];
+                loads.push({ item: name.value, watts: w.value, hp: h.value });
+                await set(ref(db, 'Current_Load_Schedule'), { loads });
+                name.value = ""; w.value = ""; h.value = "";
+                Swal.fire({ icon: 'success', title: 'تم الحفظ بنجاح', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            };
+
+            window.showDataModal = async function () {
+                // Initialize allLoads and filteredLoads (attach original indices)
+                const snap = await get(ref(db, 'Current_Load_Schedule'));
+                if (snap.exists() && snap.val().loads) {
+                    allLoads = snap.val().loads;
+                    filteredLoads = allLoads.map((l, i) => ({ ...l, __idx: i }));
+                } else {
+                    allLoads = [];
+                    filteredLoads = [];
+                }
+                currentPage = 1;
+
+                Swal.fire({
+                    title: 'قاعدة البيانات المحفوظة',
+                    html: document.getElementById('tableTemplate').innerHTML,
+                    customClass: { popup: 'swal-modal-large' },
+                    allowOutsideClick: false,
+                    showConfirmButton: true, confirmButtonText: 'إغلاق',
+                    showDenyButton: true, denyButtonText: '🗑️ حذف المحدّد',
+                    didOpen: () => { window.loadModalData(filteredLoads); }
+                });
+                const dBtn = Swal.getDenyButton();
+                dBtn.onclick = (e) => { e.preventDefault(); window.deleteItem(); };
+            };
+
+            window.loadModalData = async function (loadsParam) {
+                // loadsParam: optional array to display (e.g. filteredLoads). If not provided, read from Firebase.
+                let loads = [];
+                if (Array.isArray(loadsParam)) {
+                    loads = loadsParam;
+                } else {
+                    const snap = await get(ref(db, 'Current_Load_Schedule'));
+                    loads = (snap.exists() && snap.val().loads) ? snap.val().loads : [];
+                }
+
+                // Normalize loads to include original index (__idx)
+                if (Array.isArray(loadsParam)) {
+                    // loadsParam likely already contains __idx, but ensure it
+                    loads = loads.map((l, i) => ({ __idx: l.__idx ?? i, item: l.item, watts: l.watts, hp: l.hp }));
+                    // keep filteredLoads in sync with provided array
+                    filteredLoads = loads;
+                } else {
+                    allLoads = loads;
+                    filteredLoads = allLoads.map((l, i) => ({ ...l, __idx: i }));
+                    loads = filteredLoads;
+                }
+
+                const b = document.getElementById('modalBody');
+                b.innerHTML = "";
+
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageItems = loads.slice(start, end);
+
+                pageItems.forEach((l) => {
+                    const r = b.insertRow();
+                    r.innerHTML = `
+                        <td>${l.item}</td>
+                        <td class="w-val">${l.watts}</td>
+                        <td class="h-val">${l.hp}</td>
+                        <td>
+                            <button class="edit-btn" onclick="window.enableEdit(this)">✏️ تعديل</button>
+                            <button class="save-row-btn" onclick="window.saveEdit(this)">✅ حفظ</button>
+                        </td>`;
+                    // store the original index on the row so edits/deletes update the correct item
+                    r.dataset.idx = l.__idx;
+
+                    r.onclick = function () {
+                        document.querySelectorAll('.selected-row').forEach(row => row.classList.remove('selected-row'));
+                        this.classList.add('selected-row');
+                    };
+                });
+
+                // Update pagination controls after rendering
+                window.updatePaginationControls();
+            };
+
+            window.enableEdit = function (btn) {
+                const row = btn.closest('tr');
+                const name = row.cells[0].innerText;
+                const watt = row.cells[1].innerText;
+                const hp = row.cells[2].innerText;
+
+                row.cells[0].innerHTML = `<input type="text" class="edit-mode-input" value="${name}">`;
+                row.cells[1].innerHTML = `<input type="number" class="edit-mode-input w-edit" value="${watt}">`;
+                row.cells[2].innerHTML = `<input type="number" class="edit-mode-input h-edit" value="${hp}">`;
+
+                const wi = row.querySelector('.w-edit');
+                const hi = row.querySelector('.h-edit');
+
+                wi.oninput = () => hi.value = wi.value ? (wi.value / 746).toFixed(3) : "";
+                hi.oninput = () => wi.value = hi.value ? (hi.value * 746).toFixed(3) : "";
+
+                btn.style.display = 'none';
+                row.querySelector('.save-row-btn').style.display = 'inline-block';
+            };
+
+            window.saveEdit = async function (btn) {
+                const row = btn.closest('tr');
+                const inputs = row.querySelectorAll('input');
+
+                const newItem = inputs[0].value;
+                const newWatts = inputs[1].value;
+                const newHp = inputs[2].value;
+
+                row.cells[0].innerText = newItem;
+                row.cells[1].innerText = newWatts;
+                row.cells[2].innerText = newHp;
+
+                btn.style.display = 'none';
+                row.querySelector('.edit-btn').style.display = 'inline-block';
+
+                // حفظ التعديلات في الخلفية دون إغلاق النافذة
+                // update the master array at the stored index and write full array to Firebase
+                const idx = Number(row.dataset.idx);
+                if (!Number.isNaN(idx)) {
+                    allLoads[idx] = { item: newItem, watts: newWatts, hp: newHp };
+                } else {
+                    // fallback: try to find by matching original text
+                    const matchIndex = allLoads.findIndex(a => a.item === newItem || a.watts === newWatts);
+                    if (matchIndex >= 0) allLoads[matchIndex] = { item: newItem, watts: newWatts, hp: newHp };
+                }
+                await set(ref(db, 'Current_Load_Schedule'), { loads: allLoads });
+
+                // Refresh filteredLoads and reload current page
+                const term = document.getElementById('mSearch') ? document.getElementById('mSearch').value.toLowerCase() : '';
+                filteredLoads = allLoads.map((l, i) => ({ ...l, __idx: i })).filter(l => l.item.toLowerCase().includes(term));
+                loadModalData(filteredLoads);
+
+                // إشعار صغير يختفي بسرعة ولا يغلق النافذة الرئيسية
+                Swal.showValidationMessage('تم تحديث الصف بنجاح ✅');
+                setTimeout(() => { Swal.resetValidationMessage(); }, 2000);
+            };
+
+            window.deleteItem = async function () {
+                const sel = document.querySelector('.selected-row');
+                if (!sel) return Swal.showValidationMessage('يرجى تحديد صف للحذف');
+                const idx = Number(sel.dataset.idx);
+                if (!Number.isNaN(idx)) {
+                    allLoads.splice(idx, 1);
+                    // reindex filteredLoads
+                    const term = document.getElementById('mSearch') ? document.getElementById('mSearch').value.toLowerCase() : '';
+                    filteredLoads = allLoads.map((l, i) => ({ ...l, __idx: i })).filter(l => l.item.toLowerCase().includes(term));
+                    // write full array to Firebase
+                    await set(ref(db, 'Current_Load_Schedule'), { loads: allLoads });
+
+                    // Adjust currentPage if beyond bounds
+                    const totalPages = Math.max(1, Math.ceil(filteredLoads.length / itemsPerPage));
+                    if (currentPage > totalPages) currentPage = totalPages;
+
+                    // Reload current page
+                    loadModalData(filteredLoads);
+
+                    Swal.showValidationMessage('تم الحذف بنجاح ✅');
+                    setTimeout(() => { Swal.resetValidationMessage(); }, 2000);
+                } else {
+                    return Swal.showValidationMessage('خطأ في تحديد العنصر للحذف');
+                }
+            };
+
+            window.syncFirebase = async function () {
+                // Persist the full master list to Firebase
+                await set(ref(db, 'Current_Load_Schedule'), { loads: allLoads });
+            };
+
+            window.filterModal = function () {
+                const term = document.getElementById('mSearch').value.toLowerCase();
+                filteredLoads = allLoads.map((l, i) => ({ ...l, __idx: i })).filter(l => l.item.toLowerCase().includes(term));
+                currentPage = 1; // Reset to first page on search
+                loadModalData(filteredLoads);
+            };
+
+            window.updatePaginationControls = function () {
+                const totalPages = Math.ceil(filteredLoads.length / itemsPerPage);
+                const pageInfo = document.getElementById('pageInfo');
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+
+                if (pageInfo) pageInfo.textContent = `الصفحة ${currentPage} من ${totalPages}`;
+                if (prevBtn) prevBtn.disabled = currentPage === 1;
+                if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+            };
+
+            window.nextPage = function () {
+                const totalPages = Math.ceil(filteredLoads.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadModalData(filteredLoads);
+                }
+            };
+
+            window.prevPage = function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadModalData(filteredLoads);
+                }
+            };
+        </script>
+        <script>
+            window.toggleDarkMode = (on) => {
+                document.body.classList.toggle('dark-mode', !!on);
+                try { localStorage.setItem('darkMode', on ? '1' : '0'); } catch (e) {}
+            };
+            // initialize from localStorage
+            (function(){
+                try {
+                    const v = localStorage.getItem('darkMode');
+                    const on = v === '1';
+                    const cb = document.getElementById('darkToggle');
+                    if (cb) cb.checked = on;
+                    document.body.classList.toggle('dark-mode', on);
+                } catch(e){}
+            })();
+        </script>
+</body>
+
+</html>
