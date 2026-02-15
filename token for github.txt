@@ -1,9 +1,23 @@
-<<<<<<< HEAD
-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
+git --version
+git init
+git status
+
+* upload your files to github 
+
+1-right click on VSC and open new file
+2-Clone Git Repository
+3-Choose your folder in github
+4-Then select the location in PC that can Download in
+5-Edite your file html and finish it
+6-Then Open logo in VSC (Source Control for github) he will asks for the files you change it To Commit
 
 
+----------------------------------------------
 
-Step 2: Install Git (IMPORTANT OPTIONS)
+token:- [REDACTED_GITHUB_TOKEN]
+
+
+Step 1: Install Git (IMPORTANT OPTIONS)
 
 During installation:
 
@@ -59,3 +73,7 @@ git push -u origin main
 git remote add origin https://github.com/merrooo/NDEDC_Smart_Meter.git
 git branch -M main
 git push -u origin main
+
+
+
+
