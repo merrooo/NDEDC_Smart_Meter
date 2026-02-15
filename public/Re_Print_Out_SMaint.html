@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>الصيانة</title>
+    <link rel="stylesheet" type="text/css" href="Re_Print_Out_SMaint.css">
+    <!-- for export pdf and make it valid -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <!-- for export excell and make it valid  -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Add icon library -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+
+</html>
+
+<body>
+    <div id="page-content" dir="rtl">
+        <!-- البطاقة الأولى: بيانات العداد -->
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar title -->
+            <h2>🏠 الصفحة الرئيسية</h2>
+
+            <input type="text" id="mcos" class="text_name_11" name="codeno" autocomplete="off" required
+                placeholder="... ادخل رقم العداد">
+
+            <!-- Table container -->
+            <div class="table-container">
+                <form id="dataForm">
+                    <table id="dataTable">
+                        <thead>
+                            <tr class="active-row">
+                                <th>رقم العداد</th>
+                                <th>نوع العداد</th>
+                                <th>نوع التوصيل</th>
+                                <th>سنة الصنع</th>
+                                <th>القراءة قبل الفحص</th>
+                                <th>قوة العداد بالأمبير</th>
+                                <th>القطاع</th>
+                                <th>الهندسة</th>
+                                <th>سبب الرفع</th>
+                                <th>تاريخ الرفع الهندسة</th>
+                                <th>تاريخ دخول الصيانة</th>
+                                <th>تاريخ صيانة العدادات</th>
+                                <th>تقرير الصيانة</th>
+                                <th>ملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data rows dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+
+            <!-- Print button -->
+            <button class="Print_btn" id="Print_btn">💾 تحميل التقرير</button>
+        </div>
+
+        <div class="card_1">
+            <!-- العنوان + التاريخ + لوجو -->
+            <div class="container-logo">
+                <input type="date" class="text_name_date" id="printtDate" readonly name="Date-Reciving">
+                <h1>تقرير فحص عدادالشركة المصنعة</h1>
+                <img src="Energy4.png" alt="Energy Logo">
+            </div>
+            <h1 class="card_title_1">🧾 بيانات العداد</h1>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mtype" name="mtype">
+                <span class="label_1">نوع العداد</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mconn" name="mconn">
+                <span class="label_1">نوع التوصيل</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="keta3" name="keta3">
+                <span class="label_1">القطاع</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="handsa" name="handsa">
+                <span class="label_1">الهندسة</span>
+            </div>
+
+            <div class="input-container">
+                <input type="date" readonly class="text_name_1" id="uploaddate" name="Date-Uploading">
+                <span class="label_1">تاريخ الرفع</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="reading" name="reading">
+                <span class="label_1">قراءة العداد</span>
+            </div>
+
+            <div class="input-container">
+                <input type="date" readonly class="text_name_1" id="enter_maint_Date" name="enter_maint_Date">
+                <span class="label_1">تاريخ دخول الصيانة</span>
+            </div>
+
+            <div class="input-container">
+                <input type="date" readonly class="text_name_1" id="maint_date" name="maint_date">
+                <span class="label_1">تاريخ الصيانة</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="year" name="yearmade">
+                <span class="label_1">سنة الصنع</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mpower" name="meterpower">
+                <span class="label_1">قوة العداد بالأمبير</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="removingfor" name="Removing">
+                <span class="label_1">سبب الرفع</span>
+            </div>
+
+            <div class="input-container">
+                <input type="text" readonly class="text_name_1" id="mremovingfor" name="MRemoving">
+                <span class="label_1">تقرير الصيانة</span>
+            </div>
+            <h1 class="card_title_2">🧾 تقرير الفحص</h1>
+            <div class="container-h">
+                <div class="h5-group">
+                    <h5 id="h5_2"></h5>
+                </div>
+
+                <div class="h4-group">
+                    <h4>يعتمد</h4>
+                    <h4>شركة جلوبال ترونكس</h4>
+                    <h4>/</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- // ------------------------------------------------------today time---------------------------------------------------------------------->
+
+        <script>
+            document.addEventListener('DOMContentLoaded', (event) => {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('printtDate').value = today;
+                document.getElementById('uploaddate').value = today;
+                document.getElementById('maint_date').value = today;
+                document.getElementById('enter_maint_Date').value = today;
+            });
+        </script>
+
+        <!-- // ------------------------------------------------------ClearAll---------------------------------------------------------------------->
+        <script>
+            function clearAll() {
+                location.reload();
+            }
+        </script>
+        <!------------------------------------------------------------DataBase------------------------------------------------------------------------->
+        <script type="module">
+            // ✅ Correct Firebase App Initialization
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+            import {
+                getDatabase,
+                ref,
+                get,
+                set,
+                remove,
+                child,
+                update,
+                onValue,
+                push,
+                query
+            } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+            // ------------------------------------------------------Initialize Firebase---------------------------------------------------------------------->
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyCTSWDR3IvFpzp8UARsClrpwbRtTwr12jA",
+                authDomain: "ndedc-meter-calib.firebaseapp.com",
+                databaseURL: "https://ndedc-meter-calib-default-rtdb.firebaseio.com",
+                projectId: "ndedc-meter-calib",
+                storageBucket: "ndedc-meter-calib.appspot.com",
+                messagingSenderId: "185425429190",
+                appId: "1:185425429190:web:dce85f29eea55ad9f54dc7",
+                measurementId: "G-C6QEKW26MW"
+            };
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+
+            // ------------------------------------------------------FetchMetercalib----------------------------------------------------------------->
+
+            let isFetching = false;
+
+            async function FetchMetercalib() {
+                if (isFetching) return; // Prevent multiple calls
+                isFetching = true;
+
+                const uniqueKey = mcos.value.trim();
+                console.log("🔍 Searching for:", uniqueKey);
+
+                const tableBody = document.querySelector("#dataTable tbody");
+                tableBody.innerHTML = ""; // Clear previous results
+
+                if (!uniqueKey) {
+                    console.log("🔄 Empty → loading all data...");
+                    await fetchAllDataToTable(); // Make sure this function exists
+                    isFetching = false;
+                    return;
+                }
+
+                try {
+                    const db = getDatabase();
+                    let foundMaint = false;
+
+                    // === Archive_Maint ===
+                    const MaintSnap = await get(ref(db, "Archive_Maint"));
+                    if (MaintSnap.exists()) {
+                        MaintSnap.forEach(MaintSnap => {
+                            const data = MaintSnap.val();
+                            const d = data.otherdata || {};
+
+                            if (String(d.MCO) === uniqueKey || String(d.MNO) === uniqueKey) {
+                                foundMaint = true;
+
+                                // Create row
+                                const row = document.createElement("tr");
+                                row.innerHTML = `
+                        <td>${d.MNO || ""}</td>
+                        <td>${d.Mtype || ""}</td>
+                        <td>${d.Connection || ""}</td>
+                        <td>${d.YEAR || ""}</td>
+                        <td>${d.MREADING || ""}</td>
+                        <td>${d.MPower || ""}</td>
+                        <td>${d.Keta3 || ""}</td>
+                        <td>${d.Handsa || ""}</td>
+                        <td>${d.Removingfor || ""}</td>
+                        <td>${d.Uploaddate || ""}</td>
+                        <td>${d.Enter_Maint_Date || ""}</td>
+                        <td>${d.Maint_Date || ""}</td>
+                        <td>${d.Mremovingfor || ""}</td>
+                        <td>${d.Notes || ""}</td>
+                    `;
+                                tableBody.appendChild(row);
+
+                                // Click event to fill input fields
+                                row.addEventListener("click", () => {
+                                    // Remove highlight from other rows
+                                    Array.from(tableBody.rows).forEach(r => r.classList.remove("highlight"));
+                                    row.classList.add("highlight");
+
+                                    // Fill the inputs
+                                    const fields = [
+                                        "mtype", "mno", "year", "reading", "mpower", "mconn",
+                                        "keta3", "handsa", "removingfor", "mremovingfor",
+                                        "uploaddate", "enter_maint_Date", "maint_date"
+                                    ];
+
+                                    const values = [
+                                        d.Mtype, d.MNO, d.YEAR, d.MREADING, d.MPower, d.Connection,
+                                        d.Keta3, d.Handsa, d.Removingfor, d.Mremovingfor,
+                                        d.Uploaddate, d.Enter_Maint_Date, d.Maint_Date
+                                    ];
+
+                                    fields.forEach((id, index) => {
+                                        const input = document.getElementById(id);
+                                        if (input) input.value = values[index] || "";
+                                    });
+
+                                    // Fill report notes
+                                    const h5_2 = document.getElementById("h5_2");
+                                    if (h5_2) h5_2.innerText = d.Notes || "";
+                                });
+                            }
+                        });
+                    }
+
+                    // ⚠️ No results message
+                    if (!foundMaint) {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `<td colspan="14">⚠️ لا توجد بيانات في الصيانة للرقم أو الكود: ${uniqueKey}</td>`;
+                        tableBody.appendChild(row);
+                    }
+
+                } catch (error) {
+                    console.error("Firebase Error:", error);
+                    alert("❌ حدث خطأ أثناء جلب البيانات: " + error.message);
+                } finally {
+                    isFetching = false;
+                }
+            }
+
+            // Run on page load
+            window.addEventListener("DOMContentLoaded", fetchAllDataToTable);
+
+            // ------------------------------------------------------FetchAllDataToTable----------------------------------------------------------------->
+            async function fetchAllDataToTable() {
+                try {
+                    const db = getDatabase();
+                    const dbRef = ref(db, "Archive_Maint");
+                    const snapshot = await get(dbRef);
+
+                    const tableBody = document.querySelector("#dataTable tbody");
+                    tableBody.innerHTML = "";
+
+                    if (!snapshot.exists()) {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `<td colspan="13">❌ لا توجد بيانات في الأرشيف.</td>`;
+                        tableBody.appendChild(row);
+                        return;
+                    }
+
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        const d = data.otherdata || {};
+
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                <td>${d.MNO || ""}</td>
+                <td>${d.Mtype || ""}</td>
+                <td>${d.Connection || ""}</td>
+                <td>${d.YEAR || ""}</td>
+                <td>${d.MREADING || ""}</td>
+                <td>${d.MPower || ""}</td>
+                <td>${d.Keta3 || ""}</td>
+                <td>${d.Handsa || ""}</td>
+                <td>${d.Removingfor || ""}</td>
+                <td>${d.Uploaddate || ""}</td>
+                <td>${d.Enter_Maint_Date || ""}</td>
+                <td>${d.Maint_Date || ""}</td>
+                <td>${d.Mremovingfor || ""}</td>
+                <td>${d.Notes || ""}</td>
+            `;
+                        tableBody.appendChild(row);
+
+                        // Click event to fill input fields
+                        row.addEventListener("click", () => {
+                            // Remove highlight from other rows
+                            Array.from(tableBody.rows).forEach(r => r.classList.remove("highlight"));
+                            row.classList.add("highlight");
+
+                            // Fill the inputs - IDs must match your HTML
+                            const fields = [
+                                "mtype", "mno", "year", "reading", "mpower", "mconn",
+                                "keta3", "handsa", "removingfor", "mremovingfor",
+                                "uploaddate", "enter_maint_Date", "maint_date"
+                            ];
+
+                            const values = [
+                                d.Mtype, d.MNO, d.YEAR, d.MREADING, d.MPower, d.Connection,
+                                d.Keta3, d.Handsa, d.Removingfor, d.Mremovingfor,
+                                d.Uploaddate, d.Enter_Maint_Date, d.Maint_Date
+                            ];
+
+                            fields.forEach((id, index) => {
+                                const input = document.getElementById(id);
+                                if (input) input.value = values[index] || "";
+                            });
+
+                            // Fill report notes
+                            const h5_2 = document.getElementById("h5_2");
+                            if (h5_2) h5_2.innerText = "" + (d.Notes || "");
+                        });
+                    });
+                } catch (error) {
+                    console.error("Firebase Error:", error);
+                    alert("❌ حدث خطأ أثناء جلب البيانات: " + error.message);
+                }
+            }
+
+            // Run on page load
+            window.addEventListener("DOMContentLoaded", fetchAllDataToTable);
+
+
+            // ------------------------------------------------------Print_Pdf----------------------------------------------------------------->
+
+            document.getElementById('Print_btn').addEventListener('click', async () => {
+                const element = document.getElementById('page-content');
+
+                const opt = {
+                    margin: [1, 1, -75, -77],
+                    filename: 'Meter_Calibration_Report.pdf',
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: {
+                        scale: 1,
+                        useCORS: true,
+                        scrollX: 0,
+                        scrollY: 0
+                    },
+                    jsPDF: {
+                        unit: 'px',
+                        format: [1123, 794],
+                        orientation: 'landscape'
+                    }
+                };
+
+                // Hide table, buttons, sidebar, etc.
+                if (typeof hideall === "function") hideall();
+
+                const originalTransform = element.style.transform;
+                const originalOrigin = element.style.transformOrigin;
+
+                element.style.transformOrigin = 'top center';
+                element.style.transform = 'scale(1)';
+
+                try {
+                    await new Promise((resolve) => {
+                        setTimeout(() => {
+                            html2pdf()
+                                .set(opt)
+                                .from(element)
+                                .save()
+                                .then(resolve)
+                                .catch(console.error);
+                        }, 500);
+                    });
+
+                    // Restore scaling
+                    element.style.transform = originalTransform;
+                    element.style.transformOrigin = originalOrigin;
+
+                    // Show table, buttons, sidebar again
+                    if (typeof showall === "function") showall();
+
+                    // Optional delay before redirecting
+                    setTimeout(() => {
+                        window.location.href = 'Print_Out_TMaint.html';
+                    }, 1000);
+
+                } catch (error) {
+                    console.error("Error during PDF save:", error);
+                    // Make sure everything is restored even if error occurs
+                    if (typeof showall === "function") showall();
+                }
+            });
+
+            // ------------------------------------------------------Hide_Show_Elements-------------------------------------------------------------->
+
+
+            // Function to hide table, buttons, and sidebar
+            function hideall() {
+                const elementsToHide = [
+                    document.getElementById('dataTable'),
+                    document.getElementById('Print_btn'),
+                    document.querySelector(".sidebar"),
+                ];
+
+                elementsToHide.forEach(el => {
+                    if (el) el.style.display = 'none';
+                });
+            }
+
+            // Function to show the same elements back
+            function showall() {
+                const elementsToShow = [
+                    document.getElementById('dataTable'),
+                    document.getElementById('Print_btn'),
+                    document.querySelector(".sidebar"),
+                ];
+
+                elementsToShow.forEach(el => {
+                    if (el) el.style.display = ''; // restore default
+                });
+            }
+
+            mcos.addEventListener('input', FetchMetercalib);
+        </script>
+</body>
+
+</html>

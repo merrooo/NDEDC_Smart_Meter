@@ -1,0 +1,348 @@
+<<<<<<< HEAD body {
+    margin: 0;
+    font-family: 'Cairo', 'Poppins', sans-serif;
+    direction: rtl;
+    background: linear-gradient(135deg, #f7f9fc);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* ================= HEADER & SIDEBAR ================= */
+
+/* Header and logo container */
+.container-logo {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 70px;
+    background: linear-gradient(180deg, #ffffff);
+    color: rgb(0, 0, 0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+
+    border-bottom: 1px solid #ccc;
+    /* ← thin line underneath */
+    border-top: none;
+    border-left: none;
+    border-right: none;
+
+    z-index: 1000;
+    font-family: 'Cairo', 'Poppins', sans-serif;
+}
+
+
+
+.container-logo img {
+    width: 100px;
+    height: 50px;
+    margin-left: -30px;
+}
+
+
+.container-logo h1 {
+    margin-left: 90px;
+    font-size: 25px;
+    font-weight: 600;
+    font-family: 'Cairo', 'Poppins', sans-serif;
+}
+
+/* === Sidebar === */
+.sidebar {
+    position: fixed;
+    right: 0;
+    width: 235px;
+    background: linear-gradient(180deg, #ffffff);
+    color: #000000;
+    padding: 5px;
+    font-family: 'Cairo', 'Poppins', sans-serif;
+    direction: rtl;
+    z-index: 1000;
+    border-radius: 6px;
+    font-size: 12px;
+    height: 195px;
+    margin-top: -5px;
+}
+
+/* Sidebar title */
+.sidebar-title {
+    font-size: 2px;
+    text-align: center;
+    color: #000000;
+    letter-spacing: 1px;
+}
+
+/* ================= CARDS ================= */
+.card_1 {
+    width: 850px;
+    height: 185px;
+    background: #ffffff;
+    border-radius: 6px;
+
+    /* SOFT shadow */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    margin-left: 270px;
+    transition: 0.2s ease;
+}
+
+
+.cards-wrapper-1 {
+    margin-top: 80px !important;
+    margin-right: 282px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+
+/* ================= INPUTS ================= */
+
+.text_name_date {
+    border: none;
+    padding: 1px 5px;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #333;
+    background: linear-gradient(180deg, #ffffff, #113485);
+    text-align: center;
+    font-family: 'Cairo', 'Poppins', sans-serif;
+
+    margin-right: 10px;
+}
+
+.text_name_1 {
+    width: 215px;
+    height: 33px;
+    border-radius: 6px;
+    margin-right: 5px;
+    margin-top: -2px;
+    padding: -10px;
+    font-size: 13px;
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+    direction: ltr;
+    text-align: left;
+    font-family: 'Cairo', 'Poppins', sans-serif;
+}
+
+.text_name_2 {
+    margin-right: 100px;
+    width: 800px;
+    padding: 1px 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    bottom: -10px;
+    text-align: left;
+    font-family: 'Cairo', 'Poppins', sans-serif;
+
+    margin-bottom: -20px;
+    /* ← This is the “gap” you wanted */
+}
+
+.input-group {
+    position: relative;
+    width: 200px;
+    margin-left: 800px;
+}
+
+.label_1 {
+    position: relative;
+    font-size: 13px;
+    color: #0078ff;
+    transition: 0.25s;
+    pointer-events: none;
+    /* optional: prevents mouse interference */
+
+    top: -35px !important;
+    left: -120px !important;
+}
+
+/* ================= CHECKBOX ================= */
+.label_chkbx {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.chkbx {
+    width: 18px;
+    height: 25px;
+    cursor: pointer;
+    accent-color: #0078ff;
+    margin-right: 100px;
+}
+
+/* Optional visual effect when inputs are active */
+.active-card-input {
+    background-color: #f0f8ff;
+    border: 1px solid #4a90e2;
+    transition: all 0.3s ease;
+}
+
+.scroll-buttons {
+    position: fixed;
+    left: 20px;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.scroll-buttons button {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(180deg, #113485, #001a4d);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.scroll-buttons button:hover {
+    background: linear-gradient(180deg, #0040ff, #001a4d);
+    transform: scale(1.1);
+}
+
+/* ================= BUTTONS ================= */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 5px 0;
+}
+
+.button-container button {
+    padding: 10px 24px;
+    font-size: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.25s;
+    font-weight: 600;
+    border: none;
+}
+
+#btnexcell {
+    background: #28a745;
+    color: white;
+}
+
+#dlt_btn {
+    background: #dc3545;
+    color: white;
+}
+
+/* ===== TABLE WRAPPER ===== */
+.table-wrapper {
+    width: 100%;
+    margin: 10px auto;
+    overflow-x: auto;
+    /* allow scroll on very small screens */
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 1px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===== MAIN TABLE ===== */
+#dataTable {
+    width: 100%;
+    /* full width */
+    border-collapse: collapse;
+    direction: rtl;
+    word-break: break-word;
+    table-layout: auto;
+    /* columns adapt dynamically */
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+}
+
+/* ===== HEADER ===== */
+#dataTable thead th {
+    background-color: #a0c6f1;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 2px solid #b2cce6;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===== BODY CELLS ===== */
+#dataTable tbody td {
+    padding: 6px 8px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===== ROW HOVER ===== */
+#dataTable tbody tr:hover {
+    background-color: #f0f8ff;
+    transform: scale(1.01);
+}
+
+/* ===== RESPONSIVE ===== */
+@media screen and (max-width: 768px) {
+
+    #dataTable thead th,
+    #dataTable tbody td {
+        padding: 6px 4px;
+        font-size: 12px;
+        font-family: 'Poppins', sans-serif;
+    }
+}
+
+/* ===== OPTIONAL: STRIPED ROWS ===== */
+#dataTable tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.container-shake {
+    animation: shake .25s;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    50% {
+        transform: translateX(8px);
+    }
+
+    75% {
+        transform: translateX(-8px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة شرائح الكهرباء الموحدة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Tarrifs.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header-wrapper">
+            <h2><i class="fas fa-bolt"></i>الشرائح</h2>
+            <button class="btn-home" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i> الرئيسية
+            </button>
+        </div>
+        <div class="input-group">
+            <div class="input-item">
+                <label>رقم العداد</label>
+                <input type="text" id="meterNo" value="0803083177-41963763">
+            </div>
+            <div class="input-item">
+                <label>من تاريخ</label>
+                <input type="date" id="fromDate">
+            </div>
+            <div class="input-item">
+                <label>إلى تاريخ</label>
+                <input type="date" id="toDate">
+            </div>
+            <div class="input-item">
+                <label>الاستهلاك (ك.و.س)</label>
+                <input type="number" id="tkwh" value="13795" oninput="calculate()">
+            </div>
+            <div class="input-item">
+                <label>رصيد دخول الشهر</label>
+                <input type="number" id="balmoney1" value="14757.57">
+            </div>
+            <div class="input-item">
+                <label>ماتم شحنه</label>
+                <input type="number" id="charge" value="5484">
+            </div>
+            <div class="input-item">
+                <label>رصيد خروج الشهر</label>
+                <input type="number" id="balmoney2" value="7657.52">
+            </div>
+            <div class="input-item">
+                <label for="tariffType">نوع النشاط</label>
+                <select id="tariffType" onchange="initTable()">
+                    <option value="factory">قوى محركة</option>
+                    <option value="residential">منزلي</option>
+                    <option value="commercial">تجاري</option>
+                    <option value="farmer">الري</option>
+                </select>
+            </div>
+            <div class="input-item">
+                <label>إجمالي التشريح</label>
+                <input type="number" id="totmoney" value="0" readonly>
+            </div>
+        </div>
+
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th>الشريحة</th>
+                    <th>الاستهلاك</th>
+                    <th>السعر</th>
+                    <th>خدمة العملاء</th>
+                    <th>فرق تشريح</th>
+                    <th>الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody id="tariffTableBody"></tbody>
+        </table>
+
+        <div class="btn-group">
+            <button class="btn-save" onclick="addToLog()"><i class="fas fa-plus"></i> إضافة للسجل</button>
+            <button class="btn-export" onclick="exportTableToCSV()"><i class="fas fa-file-excel"></i> تصدير
+                البيانات</button>
+            <button class="btn-clear" onclick="clearLog()"><i class="fas fa-trash"></i> مسح السجل</button>
+        </div>
+
+        <div class="log-section">
+            <h3><i class="fas fa-history"></i> سجل الاستهلاك التاريخي</h3>
+            <table id="logTable">
+                <thead>
+                    <tr>
+                        <th>العداد</th>
+                        <th>من</th>
+                        <th>إلى</th>
+                        <th>الاستهلاك</th>
+                        <th>دخول</th>
+                        <th>شحن</th>
+                        <th>خروج</th>
+                        <th>التشريح</th>
+                        <th class="actual-col">الفعلي</th>
+                        <th>الفرق</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="logTableBody"></tbody>
+                <tfoot>
+                    <tr class="summary-row">
+                        <td colspan="3">الإجمالي العام</td>
+                        <td id="sumKwh">0</td>
+                        <td>---</td>
+                        <td id="sumCharge">0.00</td>
+                        <td>---</td>
+                        <td id="sumMoney">0.00</td>
+                        <td id="sumActual" class="actual-col">0.00</td>
+                        <td id="sumDiff">0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const config = {
+            residential: [
+                { label: "ش1 (0-50)", p: 0.68, s: 1 },
+                { label: "ش2 (51-100)", p: 0.78, s: 2 },
+                { label: "ش3 (0-200)", p: 0.95, s: 6 },
+                { label: "ش4 (201-350)", p: 1.55, s: 11 },
+                { label: "ش5 (351-650)", p: 1.65, s: 15 },
+                { label: "ش6 (651-1000)", p: 2.10, s: 25 },
+                { label: "ش7 (1001+)", p: 2.23, s: 40 }
+            ],
+            commercial: [
+                { label: "ش1 (0-100)", p: 0.85, s: 5 },
+                { label: "ش2 (0-250)", p: 1.68, s: 15 },
+                { label: "ش3 (0-600)", p: 2.20, s: 20 },
+                { label: "ش4 (601-1000)", p: 2.27, s: 25 },
+                { label: "ش5 (1001+)", p: 2.33, s: 40 }
+            ],
+            farmer: [{ label: "الري (موحد)", p: 2.00, s: 4 }],
+            factory: [{ label: "قوى محركة", p: 2.34, s: 15 }]
+        };
+
+        function initTable() {
+            const type = document.getElementById('tariffType').value;
+            const tbody = document.getElementById('tariffTableBody');
+            tbody.innerHTML = '';
+            config[type].forEach((item, index) => {
+                const i = index + 1;
+                tbody.innerHTML += `<tr id="row${i}">
+                    <td>${item.label}</td>
+                    <td><input id="q${i}" readonly value="0" class="table-input-small"></td>
+                    <td><input id="p${i}" value="${item.p}" oninput="calculate()" class="table-input-small"></td>
+                    <td><input id="s${i}" value="${item.s}" oninput="calculate()" class="table-input-small"></td>
+                    <td><input id="r${i}" value="0" readonly class="table-input-small"></td>
+                    <td><input id="t${i}" readonly value="0" class="table-input-medium"></td>
+                </tr>`;
+            });
+            calculate();
+        }
+
+        function calculate() {
+            const type = document.getElementById('tariffType').value;
+            const totalKwh = Number(document.getElementById('tkwh').value) || 0;
+            const rowsCount = config[type].length;
+
+            for (let i = 1; i <= rowsCount; i++) {
+                document.getElementById(`q${i}`).value = 0;
+                document.getElementById(`r${i}`).value = 0;
+                document.getElementById(`t${i}`).value = 0;
+                document.getElementById(`row${i}`).classList.remove('highlight');
+            }
+
+            if (type === 'residential') {
+                if (totalKwh >= 1001) {
+                    document.getElementById('q7').value = totalKwh; document.getElementById('r7').value = 170;
+                    document.getElementById('row7').classList.add('highlight');
+                } else if (totalKwh >= 651) {
+                    document.getElementById('q6').value = totalKwh; document.getElementById('r6').value = 135;
+                    document.getElementById('row6').classList.add('highlight');
+                } else if (totalKwh > 200) {
+                    document.getElementById('q3').value = 200; document.getElementById('r3').value = 24;
+                    let rem = totalKwh - 200;
+                    if (rem <= 150) { document.getElementById('q4').value = rem; document.getElementById('row4').classList.add('highlight'); }
+                    else { document.getElementById('q4').value = 150; document.getElementById('q5').value = (rem - 150).toFixed(2); document.getElementById('row5').classList.add('highlight'); }
+                } else {
+                    let q1 = Math.min(50, totalKwh); document.getElementById('q1').value = q1;
+                    if (totalKwh > 50) {
+                        document.getElementById('q2').value = Math.min(50, totalKwh - 50);
+                        if (totalKwh > 100) { document.getElementById('q3').value = (totalKwh - 100).toFixed(2); document.getElementById('row3').classList.add('highlight'); }
+                        else { document.getElementById('row2').classList.add('highlight'); }
+                    } else { document.getElementById('row1').classList.add('highlight'); }
+                }
+            } else if (type === 'commercial') {
+                if (totalKwh >= 1001) {
+                    document.getElementById('q5').value = totalKwh; document.getElementById('r5').value = 140;
+                    document.getElementById('row5').classList.add('highlight');
+                } else if (totalKwh >= 601) {
+                    document.getElementById('q4').value = totalKwh; document.getElementById('row4').classList.add('highlight');
+                } else if (totalKwh >= 251) {
+                    document.getElementById('q3').value = totalKwh; document.getElementById('r3').value = 50;
+                    document.getElementById('row3').classList.add('highlight');
+                } else if (totalKwh >= 101) {
+                    document.getElementById('q2').value = totalKwh; document.getElementById('r2').value = 55;
+                    document.getElementById('row2').classList.add('highlight');
+                } else {
+                    document.getElementById('q1').value = totalKwh; document.getElementById('row1').classList.add('highlight');
+                }
+            } else {
+                document.getElementById('q1').value = totalKwh;
+                document.getElementById('row1').classList.add('highlight');
+            }
+
+            let grandTotal = 0;
+            for (let i = 1; i <= rowsCount; i++) {
+                let q = Number(document.getElementById(`q${i}`).value) || 0;
+                let p = Number(document.getElementById(`p${i}`).value) || 0;
+                let s = Number(document.getElementById(`s${i}`).value) || 0;
+                let r = Number(document.getElementById(`r${i}`).value) || 0;
+                if (q > 0 || r > 0) {
+                    let rowT = (q * p) + s + r;
+                    document.getElementById(`t${i}`).value = rowT.toFixed(2);
+                    grandTotal += rowT;
+                }
+            }
+            document.getElementById('totmoney').value = grandTotal.toFixed(2);
+        }
+
+        function addToLog() {
+            const meter = document.getElementById('meterNo').value || "N/A";
+            const fromD = document.getElementById('fromDate').value || "-";
+            const toD = document.getElementById('toDate').value || "-";
+            const kwh = Number(document.getElementById('tkwh').value);
+            const bal1 = Number(document.getElementById('balmoney1').value);
+            const charge = Number(document.getElementById('charge').value);
+            const bal2 = Number(document.getElementById('balmoney2').value);
+            const cost = Number(document.getElementById('totmoney').value);
+
+            const actualCost = (bal1 + charge) - bal2;
+            const diff = actualCost - cost;
+
+            const logBody = document.getElementById('logTableBody');
+            const row = document.createElement('tr');
+
+            // تلوين الصف بالكامل إذا كان الفرق سالباً
+            if (diff < 0) {
+                row.classList.add('negative-diff');
+            }
+
+            row.innerHTML = `
+        <td>${meter}</td>
+        <td>${fromD}</td>
+        <td>${toD}</td>
+        <td class="log-kwh">${kwh}</td>
+        <td>${bal1}</td>
+        <td class="log-charge">${charge}</td>
+        <td>${bal2}</td>
+        <td class="log-cost">${cost.toFixed(2)}</td>
+        <td class="log-actual actual-col">${actualCost.toFixed(2)}</td>
+        <td class="log-diff diff-col inherit-color">${diff.toFixed(2)}</td>
+        <td><button class="btn-delete" onclick="deleteRow(this)"><i class="fas fa-trash-alt"></i></button></td>
+    `;
+            logBody.appendChild(row);
+            updateTotals();
+        }
+
+        function deleteRow(btn) {
+            if (confirm("حذف هذا السجل؟")) {
+                btn.closest('tr').remove();
+                updateTotals();
+            }
+        }
+
+        function updateTotals() {
+            let totalKwh = 0, totalMoney = 0, totalActual = 0, totalDiff = 0, totalCharge = 0;
+
+            document.querySelectorAll('.log-kwh').forEach(el => totalKwh += Number(el.innerText));
+            document.querySelectorAll('.log-cost').forEach(el => totalMoney += Number(el.innerText));
+            document.querySelectorAll('.log-actual').forEach(el => totalActual += Number(el.innerText));
+            document.querySelectorAll('.log-diff').forEach(el => totalDiff += Number(el.innerText));
+            document.querySelectorAll('.log-charge').forEach(el => totalCharge += Number(el.innerText));
+
+            // تحديث القيم في الجدول
+            document.getElementById('sumKwh').innerText = totalKwh.toFixed(2);
+            document.getElementById('sumMoney').innerText = totalMoney.toFixed(2);
+            document.getElementById('sumActual').innerText = totalActual.toFixed(2);
+            document.getElementById('sumCharge').innerText = totalCharge.toFixed(2);
+
+            // التحكم في لون إجمالي الفرق
+            const sumDiffEl = document.getElementById('sumDiff');
+            sumDiffEl.innerText = totalDiff.toFixed(2);
+        }
+
+        function clearLog() {
+            if (confirm("سيتم مسح كافة السجلات؟")) {
+                document.getElementById('logTableBody').innerHTML = '';
+                updateTotals();
+            }
+        }
+
+        function exportTableToCSV() {
+            let csv = [];
+            document.querySelectorAll("#logTable tr").forEach(row => {
+                let data = [];
+                row.querySelectorAll("th, td").forEach((cell, idx) => {
+                    if (idx < 10) data.push(cell.innerText);
+                });
+                csv.push(data.join(","));
+            });
+            const blob = new Blob(["\ufeff" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "تقرير_استهلاك_الكهرباء.csv";
+            link.click();
+        }
+
+        window.onload = initTable;
+    </script>
+</body>
+
+</html>

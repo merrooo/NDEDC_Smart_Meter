@@ -1,0 +1,1246 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin</title>
+  <link rel="stylesheet" type="text/css" href="SMART_Admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet" />
+
+</head>
+
+<body>
+  <div id="pageOverlay">
+    <div id="loadingSpinner"></div>
+  </div>
+
+  <div class="table-header">
+    <h2>Smart Meters</h2>
+    <div class="meta">
+      <div>التاريخ: <strong id="printDate">—</strong></div>
+      <div>Admin</div>
+    </div>
+  </div>
+
+  <div class="wrapper">
+    <div class="sidebar">
+      <h3>تحميل البيانات</h3>
+      <button type="button" id="restorbtn">استرجاع البيانات</button>
+      <label for="excelFile">رفع ملف اكسيل</label>
+      <input type="file" id="excelFile" accept=".xlsx, .xls" title="فتح ملف" />
+      <button type="button" id="uploadBtn">رفع البيانات إلى Firebase</button>
+      <div id="rowCountLabel" class="row-count-label"></div>
+      <button type="button" id="checkDuplicatesBtn" class="btn-warning">
+        التحقق من التكرار
+      </button>
+      <button type="button" id="clearColorsBtn" class="btn-grey">
+        تنظيف التلوين
+      </button>
+      <button type="button" id="deleteAllBtn" class="deleteAllBtn">
+        مسح البيانات
+      </button>
+
+      <!-- قسم اختيار الملف للتحميل التلقائي -->
+      <div class="file-selection">
+        <h4>📁 رفع ملف Excel يدويًا (المطلوب للتحميل التلقائي)</h4>
+        <button type="button" id="browseFileBtn" class="btn-outline">
+          اختر ملف Excel
+        </button>
+        <div id="selectedFileInfo" class="file-info">لم يتم اختيار ملف</div>
+        <div id="uploadStatus" class="upload-status"></div>
+      </div>
+
+      <!-- إعدادات التحميل التلقائي -->
+      <div class="time-settings">
+        <h4>إعدادات التحميل التلقائي</h4>
+
+        <div class="timse-controls">
+          <div class="time-group">
+            <label>وقت التحميل اليومي:</label>
+            <input type="time" id="autoUploadTime" class="time-input" value="12:22" />
+          </div>
+
+          <div class="time-group">
+            <label>وقت الانتظار قبل الرفع (ثواني):</label>
+            <input type="number" id="waitTime" class="time-input" value="3" min="1" max="300" />
+            <small class="input-hint">الوقت بين تحميل الجدول ورفع البيانات</small>
+          </div>
+        </div>
+
+        <div class="time-actions">
+          <button type="button" id="startAutoUpload" class="btn-primary">
+            بدء التحميل التلقائي
+          </button>
+          <button type="button" id="stopAutoUpload" class="btn-secondary">
+            إيقاف التحميل التلقائي
+          </button>
+        </div>
+
+        <div class="time-actions">
+          <button type="button" id="testAutoUpload" class="btn-outline">
+            اختبار التحميل الآن
+          </button>
+          <button type="button" id="resetSettings" class="btn-outline">
+            إعادة تعيين الإعدادات
+          </button>
+        </div>
+
+        <div class="status-indicator">
+          <div id="statusDot" class="status-dot"></div>
+          <span id="statusText">غير نشط</span>
+          <span id="nextRunInfo" class="next-run"></span>
+        </div>
+
+        <div class="log-container" id="uploadLog">
+          <!-- سجل التحميلات -->
+        </div>
+
+        <div class="important-note">
+          <strong>ملاحظة مهمة:</strong> يجب رفع ملف Excel يدويًا أولاً، ثم يتم
+          جدولة التحميل التلقائي. المتصفح لا يسمح بالوصول إلى الملفات تلقائيًا
+          من مسارات النظام.
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <div class="pagination-container">
+        <button class="btn-pagination" id="prevBtn" onclick="changePage(-1)">السابق</button>
+        <span id="pageInfo">صفحة 1 من 1</span>
+        <button class="btn-pagination" id="nextBtn" onclick="changePage(1)">التالي</button>
+      </div>
+      <div class="table-scroll">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>Sr</th>
+              <th>Serial Num</th>
+              <th>SIM S.Num</th>
+              <th>Badge Number</th>
+              <th>Manufacturer</th>
+              <th>Model</th>
+              <th>EEHC Unified code</th>
+              <th>Facility Description</th>
+              <th>Disco</th>
+              <th>Disco Section</th>
+              <th>Disco Branch</th>
+              <th>منطقة</th>
+              <th>Losses Area</th>
+              <th>Device function</th>
+              <th>Distribution Facility (EEHC unified code)</th>
+              <th>Installation Date</th>
+              <th>ADDRESS4</th>
+              <th>TYPE</th>
+              <th>Latitude(y)</th>
+              <th>Longitude(x)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- dynamically filled -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get,
+      remove,
+      push,
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyABeLySOk_10XjaHSUjkfnR8f3HSTFkEYU",
+      authDomain: "ndedc-smartmeter.firebaseapp.com",
+      projectId: "ndedc-smartmeter",
+      storageBucket: "ndedc-smartmeter.appspot.com",
+      messagingSenderId: "557422247352",
+      appId: "1:557422247352:web:824d4f96affd7bbb0fa34d",
+      measurementId: "G-3DCP87C92Y",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    console.log("Firebase initialized successfully!");
+
+    // متغيرات التحكم في التحميل التلقائي
+    let autoUploadInterval = null;
+    let isAutoUploadRunning = false;
+    let storedFileData = null;
+    let storedFileName = "";
+    let lastUploadTime = null;
+    // Global State
+    let allData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    const rowsPerPage = 16; // Increased for better usability
+
+    const tbody = document.querySelector("#dataTable tbody");
+
+    // ========== دوال السجلات ==========
+    function addLog(message, type = "info") {
+      console.log(
+        `[${type.toUpperCase()}] ${new Date().toLocaleTimeString("ar-EG")}: ${message}`,
+      );
+      const logContainer = document.getElementById("uploadLog");
+      if (logContainer) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString("ar-EG");
+        const logEntry = document.createElement("div");
+        logEntry.className = `log-entry log-${type}`;
+        logEntry.innerHTML = `<span class="log-time">[${timeString}]</span> ${message}`;
+        logContainer.prepend(logEntry);
+
+        const logs = logContainer.querySelectorAll(".log-entry");
+        if (logs.length > 20) {
+          logs[logs.length - 1].remove();
+        }
+      }
+
+      // تحديث حالة النقطة
+      updateStatusIndicator();
+    }
+
+    // ========== تحديث مؤشر الحالة ==========
+    function updateStatusIndicator() {
+      const statusDot = document.getElementById("statusDot");
+      const statusText = document.getElementById("statusText");
+
+      if (isAutoUploadRunning) {
+        statusDot.classList.add("active");
+        statusText.textContent = "نشط";
+        statusText.style.color = "#2ecc71";
+      } else {
+        statusDot.classList.remove("active");
+        statusText.textContent = "غير نشط";
+        statusText.style.color = "#95a5a6";
+      }
+    }
+
+    // ========== حفظ الإعدادات ==========
+    function saveAutoUploadSettings() {
+      try {
+        const settings = {
+          isRunning: isAutoUploadRunning,
+          fileName: storedFileName,
+          lastUploadTime: lastUploadTime,
+          uploadTime: document.getElementById("autoUploadTime").value,
+          waitTime: document.getElementById("waitTime").value,
+        };
+        localStorage.setItem("autoUploadSettings", JSON.stringify(settings));
+      } catch (e) {
+        console.error("فشل حفظ الإعدادات:", e);
+      }
+    }
+
+    function loadAutoUploadSettings() {
+      try {
+        const settings = JSON.parse(
+          localStorage.getItem("autoUploadSettings") || "{}",
+        );
+
+        if (settings.fileName) {
+          storedFileName = settings.fileName;
+          const fileInfo = document.getElementById("selectedFileInfo");
+          if (fileInfo) {
+            fileInfo.innerHTML = `
+                        <strong>الملف المحفوظ:</strong> ${storedFileName}<br>
+                        <small>جاهز للتحميل التلقائي</small>
+                    `;
+          }
+          addLog(`تم تحميل الملف المخزن: ${storedFileName}`, "success");
+        }
+
+        if (settings.isRunning) {
+          isAutoUploadRunning = settings.isRunning;
+          updateStatusIndicator();
+          addLog("التحميل التلقائي نشط من الجلسة السابقة", "info");
+        }
+
+        if (settings.uploadTime) {
+          document.getElementById("autoUploadTime").value =
+            settings.uploadTime;
+        }
+
+        if (settings.waitTime) {
+          document.getElementById("waitTime").value = settings.waitTime;
+        }
+
+        lastUploadTime = settings.lastUploadTime || null;
+      } catch (e) {
+        console.error("فشل تحميل الإعدادات:", e);
+      }
+    }
+
+    // ========== حفظ الملف في الموقع المحلي ==========
+    function saveFileToIndexedDB(file) {
+      return new Promise((resolve, reject) => {
+        try {
+          const request = indexedDB.open("AutoUploadFilesDB", 1);
+
+          request.onupgradeneeded = function (e) {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("files")) {
+              db.createObjectStore("files", { keyPath: "id" });
+            }
+          };
+
+          request.onsuccess = function (e) {
+            const db = e.target.result;
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+              const fileData = event.target.result;
+              const transaction = db.transaction(["files"], "readwrite");
+              const store = transaction.objectStore("files");
+
+              store.put({
+                id: "autoUploadFile",
+                name: file.name,
+                data: Array.from(new Uint8Array(fileData)),
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified,
+              });
+
+              addLog(
+                `تم حفظ الملف في قاعدة البيانات المحلية: ${file.name}`,
+                "success",
+              );
+              resolve(file);
+            };
+
+            reader.onerror = () => reject(new Error("خطأ في قراءة الملف"));
+            reader.readAsArrayBuffer(file);
+          };
+
+          request.onerror = function (e) {
+            reject(new Error("خطأ في فتح قاعدة البيانات"));
+          };
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+
+    // ========== تحميل الملف من الموقع المحلي ==========
+    function loadFileFromIndexedDB() {
+      return new Promise((resolve, reject) => {
+        try {
+          const request = indexedDB.open("AutoUploadFilesDB", 1);
+
+          request.onsuccess = function (e) {
+            const db = e.target.result;
+            const transaction = db.transaction(["files"], "readonly");
+            const store = transaction.objectStore("files");
+            const getRequest = store.get("autoUploadFile");
+
+            getRequest.onsuccess = function (event) {
+              const fileData = event.target.result;
+              if (fileData) {
+                storedFileData = new Uint8Array(fileData.data).buffer;
+                storedFileName = fileData.name;
+
+                addLog(
+                  `تم تحميل الملف من قاعدة البيانات المحلية: ${storedFileName}`,
+                  "success",
+                );
+                resolve(fileData);
+              } else {
+                reject(new Error("لا يوجد ملف مخزن"));
+              }
+            };
+
+            getRequest.onerror = function () {
+              reject(new Error("خطأ في تحميل الملف من قاعدة البيانات"));
+            };
+          };
+
+          request.onerror = function (e) {
+            reject(new Error("خطأ في فتح قاعدة البيانات"));
+          };
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+
+    // ========== رفع الملف من الكمبيوتر تلقائياً ==========
+    async function autoUploadFromPC() {
+      addLog("بدء التحميل التلقائي من الكمبيوتر...", "info");
+
+      try {
+        // 1. محاولة تحميل الملف المخزن
+        try {
+          await loadFileFromIndexedDB();
+          addLog("تم تحميل الملف المخزن بنجاح", "success");
+        } catch (error) {
+          addLog(`❌ لا يوجد ملف مخزن: ${error.message}`, "error");
+          return;
+        }
+
+        // 2. تحميل الملف وعرضه في الجدول
+        await loadExcelFromStoredData();
+
+        // 3. انتظار الوقت المحدد
+        const waitTime =
+          parseInt(document.getElementById("waitTime").value) || 3;
+        addLog(
+          `⏳ انتظار ${waitTime} ثواني لعرض البيانات في الجدول...`,
+          "info",
+        );
+        await new Promise((resolve) => setTimeout(resolve, waitTime * 1000));
+
+        // 4. رفع البيانات إلى Firebase
+        const result = await uploadTableData();
+
+        // 5. تحديث وقت آخر تحميل
+        lastUploadTime = new Date().toISOString();
+        saveAutoUploadSettings();
+
+        addLog(
+          `✅ تم التحميل التلقائي بنجاح: ${result.processed} صف جديد`,
+          "success",
+        );
+
+        return result;
+      } catch (error) {
+        addLog(`❌ خطأ في التحميل التلقائي: ${error.message}`, "error");
+        throw error;
+      }
+    }
+
+    // ========== تحميل الملف من البيانات المخزنة ==========
+    async function loadExcelFromStoredData() {
+      return new Promise((resolve, reject) => {
+        try {
+          if (!storedFileData) {
+            reject(new Error("لا توجد بيانات ملف مخزنة"));
+            return;
+          }
+
+          addLog("جاري تحميل الملف المخزن...", "info");
+
+          const data = new Uint8Array(storedFileData);
+          let workbook;
+
+          try {
+            workbook = XLSX.read(data, { type: "array" });
+          } catch (e) {
+            const binaryString = Array.from(data)
+              .map((char) => String.fromCharCode(char))
+              .join("");
+            workbook = XLSX.read(binaryString, { type: "binary" });
+          }
+
+          let sheetName = workbook.SheetNames[0];
+          sheetName = workbook.SheetNames[0];
+
+          const worksheet = workbook.Sheets[sheetName];
+
+          if (!worksheet) {
+            reject(new Error("لم يتم العثور على ورقة عمل في الملف!"));
+            return;
+          }
+
+          const excelData = XLSX.utils.sheet_to_json(worksheet, {
+            defval: "",
+          });
+          populateTable(excelData);
+
+          addLog(`✅ تم تحميل ${excelData.length} صف من الملف`, "success");
+          resolve();
+        } catch (error) {
+          reject(new Error(`خطأ في معالجة الملف: ${error.message}`));
+        }
+      });
+    }
+
+    // ========== حفظ ملف للاستخدام التلقائي ==========
+    async function storeFileForAutoUpload(file) {
+      return new Promise((resolve, reject) => {
+        try {
+          addLog(`جاري حفظ الملف: ${file.name}`, "info");
+
+          // 1. حفظ في متغير جافا سكريبت
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            try {
+              storedFileData = evt.target.result;
+              storedFileName = file.name;
+
+              // 2. حفظ في IndexedDB للمستقبل
+              saveFileToIndexedDB(file)
+                .then(() => {
+                  // 3. تحديث واجهة المستخدم
+                  const fileInfo =
+                    document.getElementById("selectedFileInfo");
+                  if (fileInfo) {
+                    fileInfo.innerHTML = `
+                                    <strong>الملف المحفوظ:</strong> ${storedFileName}<br>
+                                    <small>الحجم: ${(file.size / 1024).toFixed(2)} KB</small><br>
+                                    <small>✅ جاهز للتحميل التلقائي</small>
+                                `;
+                  }
+
+                  // 4. حفظ الإعدادات
+                  saveAutoUploadSettings();
+
+                  addLog(
+                    `✅ تم حفظ الملف للتحميل التلقائي: ${storedFileName}`,
+                    "success",
+                  );
+                  resolve(file);
+                })
+                .catch((err) => {
+                  addLog(
+                    `❌ خطأ في حفظ الملف في قاعدة البيانات: ${err.message}`,
+                    "error",
+                  );
+                  reject(err);
+                });
+            } catch (error) {
+              reject(error);
+            }
+          };
+
+          reader.onerror = () => reject(new Error("خطأ في قراءة الملف"));
+          reader.readAsArrayBuffer(file);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+
+    function populateTable(excelData) {
+      allData = excelData.map((item, index) => {
+        // الحصول على القيم
+        const getValue = (keys) => {
+          for (const key of keys) {
+            if (
+              item[key] !== undefined &&
+              item[key] !== null &&
+              item[key] !== ""
+            ) {
+              return item[key];
+            }
+          }
+          return "";
+        };
+
+        return {
+          sr: index + 1,
+          serial: getValue(["Serial Num", "Serial", "Serial Number"]),
+          sim: getValue(["SIM S.Num", "SIM"]),
+          badge: getValue(["Badge Number", "Badge"]),
+          manuf: getValue(["Manufacturer"]),
+          model: getValue(["Model"]),
+          code1: getValue(["EEHC Unified code"]),
+          facDesc: getValue([
+            "Facililty Description",
+            "Facility Description",
+          ]),
+          disco: getValue(["Disco ", "Disco"]),
+          discoSec: getValue(["Disco Section", "Section"]),
+          discoBranch: getValue(["Disco Branch", "Branch"]),
+          area: getValue(["منطقة", "Area"]),
+          lossArea: getValue(["Losses Area", "Loss Area"]),
+          devFunc: getValue(["Device function", "Function"]),
+          distFac: getValue([
+            "Distribution Facility (EEHC unified code)",
+            "Distribution Facility",
+          ]),
+          installDate: getValue(["Installation Date", "Install Date"]),
+          addr4: getValue(["ADDRESS4", "Address"]),
+          type: getValue(["TYPE", "Type"]),
+          lat: getValue(["Latitude(y)", "Latitude"]),
+          lon: getValue(["Longitude(x)", "Longitude"]),
+        };
+      });
+
+      currentPage = 1;
+      updateTable(allData);
+    }
+
+    function excelDateToJSDate(serial) {
+      if (!serial) return "";
+
+      if (
+        typeof serial === "string" &&
+        (serial.includes("/") || serial.includes("-"))
+      ) {
+        return serial;
+      }
+
+      const num = parseFloat(serial);
+      if (isNaN(num)) return serial || "";
+
+      try {
+        const utc_days = Math.floor(num - 25569);
+        const date = new Date(utc_days * 86400 * 1000);
+
+        const dd = String(date.getDate()).padStart(2, "0");
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const yyyy = date.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+      } catch (e) {
+        return serial.toString();
+      }
+    }
+
+    // ========== رفع البيانات إلى Firebase مع التحقق من التكرار ==========
+    async function uploadTableData() {
+      const overlay = document.getElementById("pageOverlay");
+      if (overlay) overlay.style.display = "flex";
+
+      // Use allData instead of tbody rows to ensure all data is uploaded
+      if (!allData || !allData.length) {
+        if (overlay) overlay.style.display = "none";
+        throw new Error("لا توجد بيانات لإضافتها.");
+      }
+
+      const dataToUpload = allData;
+      let processed = 0;
+      let errors = 0;
+      let duplicates = 0;
+
+      addLog(`جاري رفع ${dataToUpload.length} صف إلى Firebase...`, "info");
+
+      try {
+        // 1. جلب جميع الأرقام التسلسلية الموجودة في Firebase
+        addLog("جاري التحقق من البيانات المكررة...", "info");
+        const snapshot = await get(ref(db, "SMART"));
+        const existingSerials = new Set();
+
+        if (snapshot.exists()) {
+          snapshot.forEach((childSnap) => {
+            const data = childSnap.val();
+            if (data.serial) {
+              existingSerials.add(data.serial.toString().trim());
+            }
+          });
+        }
+
+        addLog(
+          `تم العثور على ${existingSerials.size} رقم تسلسلي في قاعدة البيانات`,
+          "info",
+        );
+
+        // 2. معالجة البيانات مع التحقق من التكرار
+        for (const item of dataToUpload) {
+          // الحصول على الرقم التسلسلي وتنظيفه
+          let serial = (item.serial || "").toString().trim();
+
+          if (!serial) {
+            errors++;
+            continue;
+          }
+
+          // التحقق مما إذا كان الرقم التسلسلي موجوداً بالفعل
+          if (existingSerials.has(serial)) {
+            duplicates++;
+            continue; // تخطي هذا الصف
+          }
+
+          const payload = {
+            serial,
+            sim: (item.sim || "").toString().trim(),
+            badge: (item.badge || "").toString().trim(),
+            manuf: (item.manuf || "").toString().trim(),
+            model: (item.model || "").toString().trim(),
+            code1: (item.code1 || "").toString().trim(),
+            facDesc: (item.facDesc || "").toString().trim(),
+            disco: (item.disco || "").toString().trim(),
+            discoSec: (item.discoSec || "").toString().trim(),
+            discoBranch: (item.discoBranch || "").toString().trim(),
+            area: (item.area || "").toString().trim(),
+            lossArea: (item.lossArea || "").toString().trim(),
+            devFunc: (item.devFunc || "").toString().trim(),
+            distFac: (item.distFac || "").toString().trim(),
+            installDate: excelDateToJSDate(item.installDate),
+            addr4: (item.addr4 || "").toString().trim(),
+            type: (item.type || "").toString().trim(),
+            lat: (item.lat || "").toString().trim(),
+            lon: (item.lon || "").toString().trim(),
+            createdAt: new Date().toISOString(), // إضافة تاريخ الإنشاء
+          };
+
+          try {
+            await set(ref(db, `SMART/${serial}`), payload);
+
+            // إضافة الرقم التسلسلي إلى المجموعة لمنع التكرار في نفس الجلسة
+            existingSerials.add(serial);
+
+            processed++;
+
+            // Log occasionally to avoid freezing UI
+            if (processed % 50 === 0) {
+              addLog(`✅ تم رفع ${processed} صف...`, "success");
+            }
+          } catch (e) {
+            errors++;
+            addLog(
+              `❌ خطأ في رفع الرقم التسلسلي ${serial}: ${e.message}`,
+              "error",
+            );
+          }
+        }
+      } catch (error) {
+        addLog(`❌ خطأ في جلب البيانات الحالية: ${error.message}`, "error");
+        if (overlay) overlay.style.display = "none";
+        throw error;
+      }
+
+      if (overlay) overlay.style.display = "none";
+      updateRowCount();
+
+      // عرض تقرير النتائج
+      let resultMessage = `✅ تم الانتهاء: `;
+      const parts = [];
+
+      if (processed > 0) parts.push(`تم رفع ${processed} صف جديد`);
+      if (duplicates > 0) parts.push(`تم تخطي ${duplicates} صف مكرر`);
+      if (errors > 0) parts.push(`حدثت ${errors} أخطاء`);
+
+      resultMessage += parts.join("، ") + ".";
+
+      addLog(resultMessage, processed > 0 ? "success" : "info");
+
+      // عرض تنبيه للمستخدم
+      if (duplicates > 0) {
+        alert(
+          `تم رفع ${processed} صف جديد بنجاح.\nتم تخطي ${duplicates} صف مكرر (موجود بالفعل في قاعدة البيانات).`,
+        );
+      } else if (processed > 0) {
+        alert(`تم رفع ${processed} صف جديد بنجاح.`);
+      } else if (duplicates === dataToUpload.length) {
+        alert(
+          "جميع البيانات موجودة بالفعل في قاعدة البيانات، لم يتم رفع أي بيانات جديدة.",
+        );
+      }
+
+      return { processed, duplicates, errors };
+    }
+
+    // ========== دالة لتنظيف ألوان الجدول ==========
+    function clearTableColors() {
+      if (!tbody) return;
+
+      const rows = Array.from(tbody.rows);
+      rows.forEach((row) => {
+        row.classList.remove(
+          "row-success",
+          "row-duplicate",
+          "row-error",
+          "row-warning",
+        );
+        row.title = "";
+        row.style.backgroundColor = "";
+      });
+
+      addLog("تم تنظيف تلوين الجدول", "info");
+    }
+
+    // ========== التحقق من التكرار فقط ==========
+    async function checkDuplicatesOnly() {
+      if (!tbody || !tbody.rows.length) {
+        alert("لا توجد بيانات في الجدول للتحقق منها!");
+        return;
+      }
+
+      const overlay = document.getElementById("pageOverlay");
+      if (overlay) overlay.style.display = "flex";
+
+      try {
+        // جلب البيانات الموجودة من Firebase
+        const snapshot = await get(ref(db, "SMART"));
+        const existingSerials = new Set();
+
+        if (snapshot.exists()) {
+          snapshot.forEach((childSnap) => {
+            const data = childSnap.val();
+            if (data.serial) {
+              existingSerials.add(data.serial.toString().trim());
+            }
+          });
+        }
+
+        // التحقق من تكرار البيانات في الجدول
+        const rows = Array.from(tbody.rows);
+        let duplicatesCount = 0;
+
+        rows.forEach((row) => {
+          const cells = row.cells;
+          const serial = (cells[1]?.textContent || "").trim();
+
+          if (serial && existingSerials.has(serial)) {
+            row.classList.add("row-duplicate");
+            row.title = `الرقم التسلسلي ${serial} موجود بالفعل في قاعدة البيانات`;
+            duplicatesCount++;
+          } else {
+            row.classList.remove("row-duplicate");
+            row.title = "";
+          }
+        });
+
+        if (duplicatesCount > 0) {
+          alert(
+            `تم العثور على ${duplicatesCount} صف مكرر في قاعدة البيانات.\nتم تمييزها باللون الأصفر.`,
+          );
+        } else {
+          alert("لا توجد بيانات مكررة في قاعدة البيانات.");
+        }
+      } catch (error) {
+        alert(`خطأ في التحقق من التكرار: ${error.message}`);
+      }
+
+      if (overlay) overlay.style.display = "none";
+    }
+
+    // ========== تحديث وظيفة الحذف لتنظيف الألوان ==========
+    document
+      .getElementById("restorbtn")
+      ?.addEventListener("click", async () => {
+        const overlay = document.getElementById("pageOverlay");
+        if (overlay) overlay.style.display = "flex";
+
+        // تنظيف الألوان القديمة
+        clearTableColors();
+
+        try {
+          const snapshot = await get(ref(db, "SMART"));
+          if (!snapshot.exists()) {
+            alert("لا توجد بيانات في قاعدة البيانات!");
+            allData = [];
+            updateTable([]);
+            return;
+          }
+
+          const restoredData = [];
+          let index = 1;
+          snapshot.forEach((childSnap) => {
+            const data = childSnap.val();
+            restoredData.push({
+              sr: index++,
+              serial: data.serial || "",
+              sim: data.sim || "",
+              badge: data.badge || "",
+              manuf: data.manuf || "",
+              model: data.model || "",
+              code1: data.code1 || "",
+              facDesc: data.facDesc || "",
+              disco: data.disco || "",
+              discoSec: data.discoSec || "",
+              discoBranch: data.discoBranch || "",
+              area: data.area || "",
+              lossArea: data.lossArea || "",
+              devFunc: data.devFunc || "",
+              distFac: data.distFac || "",
+              installDate: data.installDate || "",
+              addr4: data.addr4 || "",
+              type: data.type || "",
+              lat: data.lat || "",
+              lon: data.lon || "",
+            });
+          });
+
+          allData = restoredData;
+          currentPage = 1;
+          updateTable(allData);
+          addLog(
+            `تم استرجاع ${allData.length} صف من قاعدة البيانات`,
+            "success",
+          );
+        } catch (error) {
+          addLog(`❌ خطأ في استرجاع البيانات: ${error.message}`, "error");
+        } finally {
+          if (overlay) overlay.style.display = "none";
+        }
+      });
+
+    // ========== التحكم في التحميل التلقائي ==========
+    function startAutoUploadAtTime(timeString) {
+      if (!storedFileData) {
+        alert("يرجى حفظ ملف Excel أولاً باستخدام زر 'اختر ملف Excel'!");
+        return;
+      }
+
+      if (isAutoUploadRunning) {
+        stopAutoUpload();
+      }
+
+      isAutoUploadRunning = true;
+      saveAutoUploadSettings();
+      updateStatusIndicator();
+
+      // حساب الوقت المتبقي
+      const now = new Date();
+      const [hours, minutes] = timeString.split(":").map(Number);
+      const targetTime = new Date();
+      targetTime.setHours(hours, minutes, 0, 0);
+
+      // إذا كان الوقت قد مضى، أضف يوم
+      if (targetTime < now) {
+        targetTime.setDate(targetTime.getDate() + 1);
+      }
+
+      const timeUntilUpload = targetTime - now;
+
+      addLog(
+        `✅ تم تفعيل التحميل التلقائي - سيبدأ الساعة ${timeString}`,
+        "success",
+      );
+
+      // جدولة التحميل
+      if (autoUploadInterval) {
+        clearTimeout(autoUploadInterval);
+      }
+
+      autoUploadInterval = setTimeout(async () => {
+        if (isAutoUploadRunning) {
+          addLog("🔄 تموعد التحميل التلقائي - بدء العملية...", "info");
+          await autoUploadFromPC();
+
+          // جدولة التالي يومياً
+          scheduleDailyAutoUpload(timeString);
+        }
+      }, timeUntilUpload);
+
+      const nextTime = new Date(Date.now() + timeUntilUpload);
+      const nextRunInfo = document.getElementById("nextRunInfo");
+      if (nextRunInfo) {
+        nextRunInfo.textContent = `التالي: ${nextTime.toLocaleTimeString("ar-EG")}`;
+      }
+    }
+
+    function scheduleDailyAutoUpload(timeString) {
+      // جدولة يومياً بعد 24 ساعة
+      if (autoUploadInterval) {
+        clearTimeout(autoUploadInterval);
+      }
+
+      autoUploadInterval = setTimeout(
+        async () => {
+          if (isAutoUploadRunning) {
+            addLog("🔄 التحميل التلقائي اليومي - بدء العملية...", "info");
+            await autoUploadFromPC();
+
+            // استمرار الجدولة اليومية
+            scheduleDailyAutoUpload(timeString);
+          }
+        },
+        24 * 60 * 60 * 1000,
+      ); // 24 ساعة
+    }
+
+    function stopAutoUpload() {
+      if (!isAutoUploadRunning) return;
+
+      if (autoUploadInterval) {
+        clearTimeout(autoUploadInterval);
+        autoUploadInterval = null;
+      }
+
+      isAutoUploadRunning = false;
+      saveAutoUploadSettings();
+      updateStatusIndicator();
+
+      const nextRunInfo = document.getElementById("nextRunInfo");
+      if (nextRunInfo) {
+        nextRunInfo.textContent = "";
+      }
+
+      addLog("⏹️ تم إيقاف التحميل التلقائي", "info");
+    }
+
+    function updateRowCount() {
+      const label = document.getElementById("rowCountLabel");
+      if (label && tbody) {
+        const rows = Array.from(tbody.rows);
+        const visibleRows = rows.filter(
+          (row) => row.style.display !== "none",
+        );
+        label.textContent = `أجمالى العدادات المركبة: ${visibleRows.length}`;
+      }
+    }
+
+    // ========== Event Listeners ==========
+    // زر حفظ الملف للتحميل التلقائي
+    document
+      .getElementById("browseFileBtn")
+      ?.addEventListener("click", () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".xlsx, .xls";
+
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            try {
+              await storeFileForAutoUpload(file);
+            } catch (error) {
+              addLog(`❌ خطأ في حفظ الملف: ${error.message}`, "error");
+            }
+          }
+        };
+
+        input.click();
+      });
+
+    // رفع ملف يدوياً وعرضه
+    document
+      .getElementById("excelFile")
+      ?.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // تنظيف الألوان القديمة
+        clearTableColors();
+
+        addLog(`جاري تحميل الملف: ${file.name}`, "info");
+
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+
+            let sheetName = workbook.SheetNames[0];
+            sheetName = workbook.SheetNames[0];
+
+            const worksheet = workbook.Sheets[sheetName];
+            const excelData = XLSX.utils.sheet_to_json(worksheet, {
+              defval: "",
+            });
+
+            populateTable(excelData);
+            addLog(`✅ تم تحميل ${excelData.length} صف بنجاح`, "success");
+          } catch (error) {
+            addLog(`❌ خطأ في تحميل الملف: ${error.message}`, "error");
+          }
+        };
+
+        reader.readAsArrayBuffer(file);
+      });
+
+    // رفع البيانات إلى Firebase يدوياً
+    document
+      .getElementById("uploadBtn")
+      ?.addEventListener("click", async () => {
+        addLog("بدء رفع البيانات يدوياً إلى Firebase...", "info");
+        try {
+          const result = await uploadTableData();
+          addLog(
+            `✅ تم رفع ${result.processed} صف جديد، تخطي ${result.duplicates} مكرر، ${result.errors} أخطاء`,
+            "success",
+          );
+        } catch (error) {
+          addLog(`❌ خطأ في رفع البيانات: ${error.message}`, "error");
+        }
+      });
+
+    // زر التحقق من التكرار
+    document
+      .getElementById("checkDuplicatesBtn")
+      ?.addEventListener("click", async () => {
+        await checkDuplicatesOnly();
+      });
+
+    // زر تنظيف التلوين
+    document
+      .getElementById("clearColorsBtn")
+      ?.addEventListener("click", () => {
+        clearTableColors();
+      });
+
+    // بدء التحميل التلقائي عند الوقت المحدد
+    document
+      .getElementById("startAutoUpload")
+      ?.addEventListener("click", () => {
+        const timeInput = document.getElementById("autoUploadTime");
+        if (timeInput) {
+          startAutoUploadAtTime(timeInput.value);
+        } else {
+          // إذا لم يكن هناك حقل وقت، استخدم الوقت الحالي + 3 ثواني
+          const now = new Date();
+          const timeString = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+          startAutoUploadAtTime(timeString);
+        }
+      });
+
+    // إيقاف التحميل التلقائي
+    document
+      .getElementById("stopAutoUpload")
+      ?.addEventListener("click", stopAutoUpload);
+
+    // اختبار التحميل الفوري
+    document
+      .getElementById("testAutoUpload")
+      ?.addEventListener("click", async () => {
+        addLog("🧪 بدء اختبار التحميل الفوري...", "info");
+        await autoUploadFromPC();
+      });
+
+    // إعادة تعيين الإعدادات
+    document
+      .getElementById("resetSettings")
+      ?.addEventListener("click", () => {
+        if (confirm("هل تريد إعادة تعيين جميع الإعدادات؟")) {
+          localStorage.removeItem("autoUploadSettings");
+          storedFileData = null;
+          storedFileName = "";
+          isAutoUploadRunning = false;
+          lastUploadTime = null;
+
+          document.getElementById("autoUploadTime").value = "12:22";
+          document.getElementById("waitTime").value = "3";
+          document.getElementById("selectedFileInfo").innerHTML =
+            "لم يتم اختيار ملف";
+
+          if (autoUploadInterval) {
+            clearTimeout(autoUploadInterval);
+            autoUploadInterval = null;
+          }
+
+          updateStatusIndicator();
+          addLog("تم إعادة تعيين جميع الإعدادات", "info");
+        }
+      });
+
+    // حذف جميع البيانات
+    document
+      .getElementById("deleteAllBtn")
+      ?.addEventListener("click", async () => {
+        const password = prompt("أدخل كلمة المرور لحذف جميع البيانات:");
+        if (password !== "123") return alert("كلمة المرور غير صحيحة!");
+        if (!confirm("هل أنت متأكد أنك تريد حذف جميع البيانات؟")) return;
+
+        try {
+          await remove(ref(db, "SMART"));
+          if (tbody) tbody.innerHTML = "";
+          updateRowCount();
+          addLog("🗑️ تم حذف جميع البيانات من قاعدة البيانات", "info");
+          alert("تم حذف جميع البيانات من قاعدة البيانات.");
+        } catch (e) {
+          addLog("❌ فشل حذف البيانات", "error");
+          alert("فشل الحذف من قاعدة البيانات.");
+        }
+      });
+
+    // ========== التهيئة الأولية ==========
+    document.addEventListener("DOMContentLoaded", () => {
+      // تعيين التاريخ
+      const today = new Date();
+      const dateElement = document.getElementById("printDate");
+      if (dateElement) {
+        dateElement.textContent = today.toISOString().split("T")[0];
+      }
+
+      addLog("🚀 تم تحميل صفحة الإدارة بنجاح", "success");
+
+      // تحميل الإعدادات المخزنة
+      loadAutoUploadSettings();
+      updateStatusIndicator();
+    });
+
+    // حفظ الإعدادات عند إغلاق الصفحة
+    window.addEventListener("beforeunload", () => {
+      saveAutoUploadSettings();
+    });
+
+    // Update table with data
+    function updateTable(data) {
+      if (data) {
+        filteredData = data;
+        currentPage = 1;
+      }
+
+      const tableBody = document.querySelector("#dataTable tbody");
+      tableBody.innerHTML = "";
+
+      // 1. Calculate Pagination range
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const paginatedItems = filteredData.slice(start, end);
+
+      // 2. Map data to the Table
+      paginatedItems.forEach((item) => {
+        const tr = document.createElement("tr");
+        const fields = [
+          "sr",
+          "serial",
+          "sim",
+          "badge",
+          "manuf",
+          "model",
+          "code1",
+          "facDesc",
+          "disco",
+          "discoSec",
+          "discoBranch",
+          "area",
+          "lossArea",
+          "devFunc",
+          "distFac",
+          "installDate", // This will be formatted
+          "addr4",
+          "type",
+          "lat",
+          "lon",
+        ];
+
+        fields.forEach((field) => {
+          const td = document.createElement("td");
+          if (field === "installDate") {
+            td.textContent = excelDateToJSDate(item[field]);
+          } else {
+            td.textContent = item[field] || "";
+          }
+          tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+      });
+
+      // 3. Update UI Elements
+      updatePagination();
+      updateRowCount();
+    }
+
+    // --- Pagination & Navigation ---
+    function updatePagination() {
+      const totalPages = Math.max(
+        1,
+        Math.ceil(filteredData.length / rowsPerPage),
+      );
+      const pageInfo = document.getElementById("pageInfo");
+
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      if (pageInfo)
+        pageInfo.textContent = `الصفحة ${currentPage} من ${totalPages}`;
+      if (prevBtn) prevBtn.disabled = currentPage === 1;
+      if (nextBtn)
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+    }
+
+    window.changePage = (dir) => {
+      const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+      const target = currentPage + dir;
+      if (target >= 1 && target <= totalPages) {
+        currentPage = target;
+        updateTable(); // Will use existing filteredData
+      }
+    };
+  </script>
+</body>
+
+</html>
