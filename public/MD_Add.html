@@ -42,11 +42,9 @@
             margin-bottom: 30px;
         }
 
-        /* تعديل الحاوية لتوزيع العناصر */
         .record-date-wrapper {
             display: flex;
             justify-content: space-between;
-            /* يضع التاريخ يميناً والزر يساراً */
             align-items: center;
             margin-bottom: 25px;
             padding: 15px 25px;
@@ -55,7 +53,6 @@
             border: 1px dashed var(--accent);
         }
 
-        /* تنسيق زر العودة العلوي */
         .back-link-top {
             text-decoration: none;
             color: var(--primary);
@@ -74,7 +71,6 @@
             border-color: var(--accent);
         }
 
-        /* التأكد من أن حقل التاريخ لا يأخذ عرضاً كاملاً ليفسح مجالاً للزر */
         #record_date {
             width: 200px;
             margin-top: 5px;
@@ -187,15 +183,12 @@
             font-weight: bold;
         }
 
-
-        /* تنسيق حاوية القائمة المنسدلة */
         .modern-dropdown {
             position: relative;
             margin-bottom: 20px;
             width: 100%;
         }
 
-        /* تنسيق الزر الرئيسي */
         .dropdown-btn {
             background: var(--primary);
             color: white;
@@ -214,7 +207,6 @@
             background: var(--accent);
         }
 
-        /* تنسيق القائمة المخفية */
         .dropdown-menu {
             position: absolute;
             top: 100%;
@@ -224,14 +216,12 @@
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             display: none;
-            /* مخفية افتراضياً */
             z-index: 2000;
             margin-top: 5px;
             border: 1px solid #ddd;
             overflow: hidden;
         }
 
-        /* تنسيق خيارات القائمة */
         .dropdown-item {
             padding: 12px 15px;
             cursor: pointer;
@@ -249,10 +239,8 @@
             background: #f4f7f6;
             color: var(--accent);
             padding-right: 25px;
-            /* تأثير حركة عند التمرير */
         }
 
-        /* كلاس لإظهار القائمة عبر JS */
         .show {
             display: block !important;
         }
