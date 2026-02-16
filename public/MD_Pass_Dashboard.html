@@ -847,11 +847,14 @@
                         if (fH && v.handsa !== fH) continue;
 
                         let generalMatch = false;
-                        if (v.readings) {
+                        const baseSearchStr = `${v.metername || ''} ${v.keta3 || ''} ${v.handsa || ''}`.toLowerCase();
+                        if (baseSearchStr.includes(fG) || fG === '') {
+                            generalMatch = true;
+                        } else if (v.readings) {
                             for (let rKey in v.readings) {
                                 const r = v.readings[rKey];
-                                const searchStr = `${v.metername || ''} ${r.meternumber || ''}`.toLowerCase();
-                                if (searchStr.includes(fG) || fG === '') {
+                                const searchStr = `${baseSearchStr} ${r.meternumber || ''}`.toLowerCase();
+                                if (searchStr.includes(fG)) {
                                     generalMatch = true;
                                     break;
                                 }
@@ -932,10 +935,10 @@
                 masterRows += `<tr><td colspan="10" class="separator-divider"></td></tr>`;
             });
 
-            renderUI(rows, masterRows, detailCount, stats, isDelayed, startDateObj, endDateObj);
+            renderUI(rows, masterRows, detailCount, stats, isDelayed, startDateObj, endDateObj, fK, fH, fG);
         }
 
-        function renderUI(rows, masterRows, detailCount, stats, isDelayed, startDateObj, endDateObj) {
+        function renderUI(rows, masterRows, detailCount, stats, isDelayed, startDateObj, endDateObj, fK, fH, fG) {
             // Group data by customer - ONLY use filtered data
             const customerGroups = {};
             
@@ -967,6 +970,24 @@
                     }
 
                     if (!match) continue;
+                    if (fK && v.keta3 !== fK) continue;
+                    if (fH && v.handsa !== fH) continue;
+
+                    let generalMatch = false;
+                    const baseSearchStr = `${v.metername || ''} ${v.keta3 || ''} ${v.handsa || ''}`.toLowerCase();
+                    if (baseSearchStr.includes(fG) || fG === '') {
+                        generalMatch = true;
+                    } else if (v.readings) {
+                        for (let rKey in v.readings) {
+                            const r = v.readings[rKey];
+                            const searchStr = `${baseSearchStr} ${r.meternumber || ''}`.toLowerCase();
+                            if (searchStr.includes(fG)) {
+                                generalMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (fG !== '' && !generalMatch) continue;
 
                     if (!customerGroups[subID]) {
                         customerGroups[subID] = {
