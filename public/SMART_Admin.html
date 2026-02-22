@@ -135,6 +135,7 @@
               <th>TYPE</th>
               <th>Latitude(y)</th>
               <th>Longitude(x)</th>
+               <th>DivisionCode</th>
             </tr>
           </thead>
           <tbody>
@@ -521,16 +522,36 @@
     }
 
     function populateTable(excelData) {
+      const normalizeHeader = (value) =>
+        String(value || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9\u0600-\u06ff]/g, "");
+
       allData = excelData.map((item, index) => {
+        const normalizedItem = {};
+        Object.keys(item || {}).forEach((rawKey) => {
+          normalizedItem[normalizeHeader(rawKey)] = item[rawKey];
+        });
+
         // الحصول على القيم
         const getValue = (keys) => {
           for (const key of keys) {
+            const directValue = item[key];
             if (
-              item[key] !== undefined &&
-              item[key] !== null &&
-              item[key] !== ""
+              directValue !== undefined &&
+              directValue !== null &&
+              directValue !== ""
             ) {
-              return item[key];
+              return directValue;
+            }
+
+            const normalizedValue = normalizedItem[normalizeHeader(key)];
+            if (
+              normalizedValue !== undefined &&
+              normalizedValue !== null &&
+              normalizedValue !== ""
+            ) {
+              return normalizedValue;
             }
           }
           return "";
@@ -538,31 +559,43 @@
 
         return {
           sr: index + 1,
-          serial: getValue(["Serial Num", "Serial", "Serial Number"]),
-          sim: getValue(["SIM S.Num", "SIM"]),
-          badge: getValue(["Badge Number", "Badge"]),
+          serial: getValue([
+            "Serial Num",
+            "Serial",
+            "Serial Number",
+            "SerialNum",
+          ]),
+          sim: getValue(["SIM S.Num", "SIM", "SIM_S_Num"]),
+          badge: getValue(["Badge Number", "Badge", "BadgeNumber"]),
           manuf: getValue(["Manufacturer"]),
           model: getValue(["Model"]),
-          code1: getValue(["EEHC Unified code"]),
+          code1: getValue(["EEHC Unified code", "EEHCUnifiedCode"]),
           facDesc: getValue([
             "Facililty Description",
             "Facility Description",
+            "FacilityDescription",
           ]),
           disco: getValue(["Disco ", "Disco"]),
-          discoSec: getValue(["Disco Section", "Section"]),
-          discoBranch: getValue(["Disco Branch", "Branch"]),
+          discoSec: getValue(["Disco Section", "Section", "DiscoSection"]),
+          discoBranch: getValue(["Disco Branch", "Branch", "DiscoBranch"]),
           area: getValue(["منطقة", "Area"]),
-          lossArea: getValue(["Losses Area", "Loss Area"]),
-          devFunc: getValue(["Device function", "Function"]),
+          lossArea: getValue(["Losses Area", "Loss Area", "LossesArea"]),
+          devFunc: getValue(["Device function", "Function", "DeviceFunction"]),
           distFac: getValue([
             "Distribution Facility (EEHC unified code)",
             "Distribution Facility",
+            "DistributionFacility",
           ]),
-          installDate: getValue(["Installation Date", "Install Date"]),
-          addr4: getValue(["ADDRESS4", "Address"]),
+          installDate: getValue([
+            "Installation Date",
+            "Install Date",
+            "Date_Installation",
+          ]),
+          addr4: getValue(["ADDRESS4", "Address", "Address4"]),
           type: getValue(["TYPE", "Type"]),
-          lat: getValue(["Latitude(y)", "Latitude"]),
-          lon: getValue(["Longitude(x)", "Longitude"]),
+          lat: getValue(["Latitude(y)", "Latitude", "LatitudeY"]),
+          lon: getValue(["Longitude(x)", "Longitude", "LongitudeX"]),
+          dive: getValue(["DivisionCode"]),
         };
       });
 
@@ -570,30 +603,60 @@
       updateTable(allData);
     }
 
-    function excelDateToJSDate(serial) {
-      if (!serial) return "";
+    function excelDateToJSDate(value) {
+      if (value === undefined || value === null || value === "") return "";
 
-      if (
-        typeof serial === "string" &&
-        (serial.includes("/") || serial.includes("-"))
-      ) {
-        return serial;
-      }
-
-      const num = parseFloat(serial);
-      if (isNaN(num)) return serial || "";
-
-      try {
-        const utc_days = Math.floor(num - 25569);
-        const date = new Date(utc_days * 86400 * 1000);
-
-        const dd = String(date.getDate()).padStart(2, "0");
-        const mm = String(date.getMonth() + 1).padStart(2, "0");
-        const yyyy = date.getFullYear();
+      const toDDMMYYYY = (dateObj) => {
+        if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) return "";
+        const dd = String(dateObj.getDate()).padStart(2, "0");
+        const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const yyyy = dateObj.getFullYear();
         return `${dd}/${mm}/${yyyy}`;
-      } catch (e) {
-        return serial.toString();
+      };
+
+      if (value instanceof Date) {
+        return toDDMMYYYY(value);
       }
+
+      const raw = String(value).trim();
+      if (!raw) return "";
+
+      // Already dd/mm/yyyy or d/m/yyyy
+      let match = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (match) {
+        const dd = String(parseInt(match[1], 10)).padStart(2, "0");
+        const mm = String(parseInt(match[2], 10)).padStart(2, "0");
+        const yyyy = match[3];
+        return `${dd}/${mm}/${yyyy}`;
+      }
+
+      // yyyy-mm-dd or yyyy/mm/dd
+      match = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+      if (match) {
+        const yyyy = match[1];
+        const mm = String(parseInt(match[2], 10)).padStart(2, "0");
+        const dd = String(parseInt(match[3], 10)).padStart(2, "0");
+        return `${dd}/${mm}/${yyyy}`;
+      }
+
+      // Numeric Excel date serial
+      const num = Number(raw);
+      if (!isNaN(num) && Number.isFinite(num)) {
+        try {
+          const utc_days = Math.floor(num - 25569);
+          const utc_value = utc_days * 86400;
+          const dateInfo = new Date(utc_value * 1000);
+          const formatted = toDDMMYYYY(dateInfo);
+          if (formatted) return formatted;
+        } catch (e) {
+          // Fall through to generic parse below
+        }
+      }
+
+      // Final fallback for parseable date strings
+      const parsed = new Date(raw);
+      const parsedFormatted = toDDMMYYYY(parsed);
+      return parsedFormatted || raw;
     }
 
     // ========== رفع البيانات إلى Firebase مع التحقق من التكرار ==========
@@ -670,6 +733,7 @@
             type: (item.type || "").toString().trim(),
             lat: (item.lat || "").toString().trim(),
             lon: (item.lon || "").toString().trim(),
+            dive: (item.dive || "").toString().trim(),
             createdAt: new Date().toISOString(), // إضافة تاريخ الإنشاء
           };
 
@@ -849,6 +913,7 @@
               type: data.type || "",
               lat: data.lat || "",
               lon: data.lon || "",
+              dive: data.dive || "",
             });
           });
 
@@ -963,12 +1028,10 @@
 
     function updateRowCount() {
       const label = document.getElementById("rowCountLabel");
-      if (label && tbody) {
-        const rows = Array.from(tbody.rows);
-        const visibleRows = rows.filter(
-          (row) => row.style.display !== "none",
-        );
-        label.textContent = `أجمالى العدادات المركبة: ${visibleRows.length}`;
+      if (label) {
+        const totalLoaded = filteredData.length || allData.length || 0;
+        const visibleRows = tbody ? tbody.rows.length : 0;
+        label.textContent = `إجمالي الصفوف المحملة: ${totalLoaded} (المعروض الآن: ${visibleRows})`;
       }
     }
 
@@ -1195,6 +1258,7 @@
           "type",
           "lat",
           "lon",
+          "dive",
         ];
 
         fields.forEach((field) => {
