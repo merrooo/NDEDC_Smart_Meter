@@ -74,6 +74,7 @@
                             <th><i class="fas fa-tag"></i> TYPE</th>
                             <th><i class="fas fa-globe-americas"></i> Latitude(y)</th>
                             <th><i class="fas fa-globe-asia"></i> Longitude(x)</th>
+                            <th><i class="fas fa-globe-asia"></i> DivisionCode</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -205,7 +206,7 @@
                 'EEHC Unified code', 'Facility Description', 'Disco', 'Disco Section',
                 'Disco Branch', 'منطقة', 'Losses Area', 'Device function',
                 'Distribution Facility (EEHC unified code)', 'Installation Date',
-                'ADDRESS4', 'TYPE', 'Latitude(y)', 'Longitude(x)'
+                'ADDRESS4', 'TYPE', 'Latitude(y)', 'Longitude(x)','DivisionCode'
             ];
 
             return filteredData.map(data => {
@@ -229,6 +230,7 @@
                 rowData['TYPE'] = data.type || "";
                 rowData['Latitude(y)'] = data.lat || "";
                 rowData['Longitude(x)'] = data.lon || "";
+                rowData['DivisionCode'] = data.dive || "";
                 return rowData;
             });
         }
@@ -768,7 +770,8 @@
                     data.addr4 || "",
                     data.type || "",
                     data.lat || "",
-                    data.lon || ""
+                    data.lon || "",
+                    data.dive || ""
                 ];
 
                 values.forEach(value => {

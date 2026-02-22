@@ -70,6 +70,7 @@
             <th>TYPE</th>
             <th>Latitude(Y-North)</th>
             <th>Longitude(X-Est)</th>
+            <th>DivisionCode</th>
           </tr>
         </thead>
         <tbody>
@@ -119,7 +120,7 @@
     const FIELD_KEYS = [
       "serial", "sim", "badge", "manuf", "model", "code1", "facDesc",
       "disco", "discoSec", "discoBranch", "area", "lossArea", "devFunc",
-      "distFac", "installDate", "addr4", "type", "lat", "lon"
+      "distFac", "installDate", "addr4", "type", "lat", "lon","dive"
     ];
 
     let currentMeter = null;
@@ -164,17 +165,17 @@
     // ---- الحصول على placeholder ----
     function getPlaceholder(field) {
       const placeholders = {
-        "serial": "مثال: SMT-2024-001",
-        "sim": "مثال: 01001234567",
+        "serial": "مثال: 83007618",
+        "sim": "مثال: 8920040112413180496",
         "badge": "مثال: PO: 50/2024/2025",
         "manuf": "مثال: ESMC",
         "model": "مثال: CL730D22H",
         "code1": "مثال: EEHC-001",
-        "facDesc": "وصف المرفق",
+        "facDesc": "لوحة طلخا القديمة- مغذي غنام-",
         "disco": "مثال: NDEDC",
-        "discoSec": "مثال: القطاع الشمالي",
-        "discoBranch": "مثال: الفرع الرئيسي",
-        "area": "اسم المنطقة",
+        "discoSec": "مثال:قطاع جنوب الدقهلية",
+        "discoBranch": "مثال:هندسة طلخا",
+        "area": "طلخا",
         "lossArea": "منطقة الفقد",
         "devFunc": "مثال: Transformer",
         "distFac": "كود مرفق التوزيع",
@@ -182,7 +183,8 @@
         "addr4": "العنوان",
         "type": "نوع العداد",
         "lat": "مثال: 30.0444",
-        "lon": "مثال: 31.2357"
+        "lon": "مثال: 31.2357",
+        "dive": "مثال: 450"
       };
       return placeholders[field] || "أدخل البيانات هنا";
     }

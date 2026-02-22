@@ -173,8 +173,9 @@
               <th>Installation Date</th>
               <th>ADDRESS4</th>
               <th>TYPE</th>
-              <th>Latitude(y)</th>
-              <th>Longitude(x)</th>
+              <th>Latitude(Y-North)</th>
+              <th>Longitude(X-Est)</th>
+              <th>DivisionCode</th>
             </tr>
           </thead>
           <tbody>
@@ -343,6 +344,7 @@
           "type",
           "lat",
           "lon",
+          "dive",
         ];
 
         fields.forEach((field) => {
@@ -699,6 +701,7 @@
           TYPE: item.type || "",
           "Latitude(y)": item.lat || "",
           "Longitude(x)": item.lon || "",
+          "DivisionCode": item.dive || "",
         }));
 
         // Create worksheet
