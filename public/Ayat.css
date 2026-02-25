@@ -63,6 +63,12 @@ body.dark-mode {
     margin-bottom: 42px;
 }
 
+/* Gap after Excel upload button on Ayat.html */
+.entry-card > #uploadBtn {
+    margin-bottom: 16px;
+    display: inline-block;
+}
+
 .controls-right,
 .controls-left {
     display: flex;
@@ -179,6 +185,7 @@ textarea {
     border-radius: 6px;
     border: 1px solid #e6eef8;
     font-size: 13px;
+    font-family: 'Cairo', sans-serif;
     background: #fbfdff;
 }
 
@@ -231,7 +238,7 @@ textarea {
 
 /* Modal/table template styles */
 .data-modal-container {
-    max-height: 75vh;
+    max-height: 77vh;
 }
 
 .action-buttons button {

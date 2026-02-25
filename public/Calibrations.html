@@ -33,7 +33,7 @@
             <div class="input-dashboard">
                 <div class="input-group">
                     <label>System Mode</label>
-                    <select id="phase_mode" aria-label="System mode selection" onchange="calculatePhase()">
+                    <select id="phase_mode" aria-label="System mode selection" onchange="handlePhaseModeChange()">
                         <option value="3">Three Phase (3Φ)</option>
                         <option value="1">Single Phase (1Φ)</option>
                     </select>
@@ -135,6 +135,13 @@
     
 
     <script>
+        function handlePhaseModeChange() {
+            const mode = document.getElementById("phase_mode").value;
+            const voltageInput = document.getElementById("v");
+            voltageInput.value = mode === "3" ? "380" : "220";
+            calculatePhase();
+        }
+
         function calculatePhase() {
             const mode = document.getElementById("phase_mode").value;
             const thetaInput = document.getElementById("theta");
@@ -218,7 +225,7 @@
         }
 
         window.onload = function () {
-            calculatePhase();
+            handlePhaseModeChange();
             calcMeter();
         };
     </script>
