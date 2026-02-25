@@ -210,3 +210,23 @@ tr:nth-child(even) {
         font-size: 0.85rem;
     }
 }
+
+.comparison-section {
+    margin-top: 30px;
+    border-top: 2px solid #eee;
+    padding-top: 20px;
+}
+
+.summary-yellow {
+    background-color: #ffff00 !important;
+    font-weight: bold;
+}
+
+/* تحسين مظهر القائمة المنسدلة للسنوات */
+#periodSelect {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-family: 'Cairo';
+    width: 100%;
+}

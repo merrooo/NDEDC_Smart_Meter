@@ -14,10 +14,10 @@
 
 <body>
 
-  <label class="dark-toggle" title="تبديل الوضع الداكن">
-    <input id="darkToggle" type="checkbox" oninput="window.toggleDarkMode(this.checked)">
-    <span class="switch" aria-hidden="true"></span>
+  <label class="dark-toggle" onclick="document.body.classList.toggle('dark-mode')">
     <span class="icon">🌙</span>
+    <div class="switch"></div>
+    <span class="icon">☀️</span>
   </label>
 
   <div class="entry-card">
@@ -141,7 +141,7 @@
       💾 حفظ
     </button>
     <button class="btn-view" id="viewBtn" onclick="window.showData()">
-      👁 عرض 
+      👁 عرض
     </button>
   </div>
 
