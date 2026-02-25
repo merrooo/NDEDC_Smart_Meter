@@ -14,10 +14,18 @@
 
     <div class="container">
         <label class="dark-toggle" title="Toggle dark mode">
-            <input id="darkToggle" class="dark-toggle__input" type="checkbox" aria-label="Dark mode toggle" role="switch" aria-checked="false">
+            <input id="darkToggle" class="dark-toggle__input" type="checkbox" aria-label="Dark mode toggle"
+                role="switch" aria-checked="false">
             <span class="switch"></span>
             <span class="icon">🌙</span>
         </label>
+
+
+        <button class="calc-btn" onclick="window.location.href='Index.html'">
+            ⬅️ الصفحة الرئيسية
+        </button>
+
+
         <h2>⚡ Professional Cable Sizing Calculator</h2>
         <form id="calcForm">
             <table>
@@ -331,124 +339,124 @@
             }
         };
 
-      function calculateAll() {
-    // 1. Inputs
-    const I = parseFloat(document.getElementById("targetAmps").value) || 0;
-    const L_meters = parseFloat(document.getElementById("length").value) || 0;
-    const mat = document.getElementById("material").value;
-    const coreKey = document.getElementById("cores").value;
-    const vTypeKey = document.getElementById("vType").value;
-    const Vn = parseFloat(document.getElementById("voltage").value) || 380;
-    const cosphi = parseFloat(document.getElementById("pf").value) || 0.8;
+        function calculateAll() {
+            // 1. Inputs
+            const I = parseFloat(document.getElementById("targetAmps").value) || 0;
+            const L_meters = parseFloat(document.getElementById("length").value) || 0;
+            const mat = document.getElementById("material").value;
+            const coreKey = document.getElementById("cores").value;
+            const vTypeKey = document.getElementById("vType").value;
+            const Vn = parseFloat(document.getElementById("voltage").value) || 380;
+            const cosphi = parseFloat(document.getElementById("pf").value) || 0.8;
 
-    // 2. Logic: Phase Identification
-    const isThreePhase = (coreKey === "3c" || coreKey === "3.5c" || coreKey === "4c");
-    const multiplier = isThreePhase ? Math.sqrt(3) : 2.0;
-    const L_km = L_meters / 1000;
-    const sinphi = Math.sqrt(1 - Math.pow(cosphi, 2));
+            // 2. Logic: Phase Identification
+            const isThreePhase = (coreKey === "3c" || coreKey === "3.5c" || coreKey === "4c");
+            const multiplier = isThreePhase ? Math.sqrt(3) : 2.0;
+            const L_km = L_meters / 1000;
+            const sinphi = Math.sqrt(1 - Math.pow(cosphi, 2));
 
-    // 3. Set Strict VD Limits (0.02 for 1ph, 0.04 for 3ph)
-    const vdLimitPercent = isThreePhase ? 0.04 : 0.02;
-    const maxAllowedVd = Vn * vdLimitPercent;
+            // 3. Set Strict VD Limits (0.02 for 1ph, 0.04 for 3ph)
+            const vdLimitPercent = isThreePhase ? 0.04 : 0.02;
+            const maxAllowedVd = Vn * vdLimitPercent;
 
-    // 4. Dataset validation
-    if (!cableDataset[vTypeKey] || !cableDataset[vTypeKey][coreKey]) {
-        displayResults("-", "-", "-", "-");
-        return;
-    }
+            // 4. Dataset validation
+            if (!cableDataset[vTypeKey] || !cableDataset[vTypeKey][coreKey]) {
+                displayResults("-", "-", "-", "-");
+                return;
+            }
 
-    const activeSet = cableDataset[vTypeKey][coreKey];
-    const sizes = Object.keys(activeSet).map(Number).sort((a, b) => a - b);
+            const activeSet = cableDataset[vTypeKey][coreKey];
+            const sizes = Object.keys(activeSet).map(Number).sort((a, b) => a - b);
 
-    let selectedSize = null;
-    let finalVd = 0;
-    let finalSpecs = null;
+            let selectedSize = null;
+            let finalVd = 0;
+            let finalSpecs = null;
 
-    // 5. Selection Algorithm
-    for (let s of sizes) {
-        const specsMat = activeSet[s][mat];
-        if (!specsMat) continue;
+            // 5. Selection Algorithm
+            for (let s of sizes) {
+                const specsMat = activeSet[s][mat];
+                if (!specsMat) continue;
 
-        // Get Max Ampacity
-        let maxAmp = typeof specsMat.amp === "string"
-            ? parseFloat(specsMat.amp.split(" TO ")[1])
-            : specsMat.amp;
+                // Get Max Ampacity
+                let maxAmp = typeof specsMat.amp === "string"
+                    ? parseFloat(specsMat.amp.split(" TO ")[1])
+                    : specsMat.amp;
 
-        // Voltage drop calculation
-        let vd = multiplier * I * L_km * (specsMat.r * cosphi + specsMat.x * sinphi);
+                // Voltage drop calculation
+                let vd = multiplier * I * L_km * (specsMat.r * cosphi + specsMat.x * sinphi);
 
-        // CHECK: Smallest cable that satisfies BOTH current and voltage drop
-        if (maxAmp >= I && vd <= maxAllowedVd) {
-            selectedSize = s;
-            finalVd = vd;
-            finalSpecs = specsMat;
-            break; // Stop at the first (smallest) valid cable
+                // CHECK: Smallest cable that satisfies BOTH current and voltage drop
+                if (maxAmp >= I && vd <= maxAllowedVd) {
+                    selectedSize = s;
+                    finalVd = vd;
+                    finalSpecs = specsMat;
+                    break; // Stop at the first (smallest) valid cable
+                }
+
+                // Store as fallback if we never find a cable that meets VD
+                selectedSize = s;
+                finalVd = vd;
+                finalSpecs = specsMat;
+            }
+
+            // 6. Output Rendering
+            if (selectedSize && finalSpecs) {
+                document.getElementById("sizeOutput").innerText = selectedSize + " mm²";
+                document.getElementById("vdOutput").innerText = finalVd.toFixed(2) + " V";
+                document.getElementById("zOutput").innerText = finalSpecs.r + " + j" + finalSpecs.x + " Ω/km";
+                document.getElementById("scOutput").innerText = (finalSpecs.sc || 0).toFixed(2) + " kA";
+
+                const warningEl = document.getElementById("vdWarn");
+                if (finalVd > maxAllowedVd) {
+                    warningEl.style.display = "block";
+                    warningEl.innerHTML = `⚠️ LIMIT EXCEEDED: Max allowed is ${maxAllowedVd.toFixed(2)}V (${(vdLimitPercent * 100)}%)`;
+                } else {
+                    warningEl.style.display = "none";
+                }
+            } else {
+                alert("⚠️ No cable found in dataset for these parameters!");
+            }
         }
-
-        // Store as fallback if we never find a cable that meets VD
-        selectedSize = s;
-        finalVd = vd;
-        finalSpecs = specsMat;
-    }
-
-    // 6. Output Rendering
-    if (selectedSize && finalSpecs) {
-        document.getElementById("sizeOutput").innerText = selectedSize + " mm²";
-        document.getElementById("vdOutput").innerText = finalVd.toFixed(2) + " V";
-        document.getElementById("zOutput").innerText = finalSpecs.r + " + j" + finalSpecs.x + " Ω/km";
-        document.getElementById("scOutput").innerText = (finalSpecs.sc || 0).toFixed(2) + " kA";
-
-        const warningEl = document.getElementById("vdWarn");
-        if (finalVd > maxAllowedVd) {
-            warningEl.style.display = "block";
-            warningEl.innerHTML = `⚠️ LIMIT EXCEEDED: Max allowed is ${maxAllowedVd.toFixed(2)}V (${(vdLimitPercent * 100)}%)`;
-        } else {
-            warningEl.style.display = "none";
-        }
-    } else {
-        alert("⚠️ No cable found in dataset for these parameters!");
-    }
-}
     </script>
     <script>
-    (function(){
-      const checkbox = document.getElementById('darkToggle');
-      
-      function setDark(enable){
-        if(enable){ 
-          document.body.classList.add('dark-mode'); 
-          localStorage.setItem('darkMode','1'); 
-        }
-        else { 
-          document.body.classList.remove('dark-mode'); 
-          localStorage.setItem('darkMode','0'); 
-        }
-        if(checkbox) checkbox.setAttribute('aria-checked', enable);
-      }
-      
-      window.toggleDarkMode = function(){ 
-        if(checkbox) setDark(!checkbox.checked); 
-      };
-      
-      if(checkbox){
-        checkbox.addEventListener('change', function(e){ setDark(e.target.checked); });
-      }
-      
-      function init(){
-        const saved = localStorage.getItem('darkMode');
-        const enabled = saved === '1';
-        if(checkbox){
-          checkbox.checked = enabled;
-          setDark(enabled);
-        }
-      }
-      
-      if(document.readyState === 'loading'){
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
-    })();
+        (function () {
+            const checkbox = document.getElementById('darkToggle');
+
+            function setDark(enable) {
+                if (enable) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', '1');
+                }
+                else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', '0');
+                }
+                if (checkbox) checkbox.setAttribute('aria-checked', enable);
+            }
+
+            window.toggleDarkMode = function () {
+                if (checkbox) setDark(!checkbox.checked);
+            };
+
+            if (checkbox) {
+                checkbox.addEventListener('change', function (e) { setDark(e.target.checked); });
+            }
+
+            function init() {
+                const saved = localStorage.getItem('darkMode');
+                const enabled = saved === '1';
+                if (checkbox) {
+                    checkbox.checked = enabled;
+                    setDark(enabled);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
     </script>
 </body>
 

@@ -1,4 +1,4 @@
-/* --- Global Styles --- */
+﻿/* --- Global Styles --- */
 * {
     box-sizing: border-box;
     font-family: "Cairo", sans-serif;
@@ -12,6 +12,8 @@ body {
     display: flex;
     justify-content: center;
     padding: 20px;
+    direction: rtl;
+    text-align: right;
 }
 
 .app {
@@ -27,6 +29,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
     background: #065192;
     padding: 15px 25px;
     border-radius: 12px;
@@ -56,6 +60,7 @@ body {
     font-weight: 700;
     color: #343a40;
     border-bottom: 1px solid #eee;
+    text-align: start;
 }
 
 /* --- Input Grid (Dynamic for Load/Motor) --- */
@@ -71,9 +76,8 @@ body {
 .trans-input-grid {
     padding: 20px;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    /* Forces 5 columns */
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
     background: #ffffff;
 }
 
@@ -87,7 +91,8 @@ body {
     font-size: 12px;
     font-weight: 700;
     color: #065192;
-    white-space: nowrap;
+    white-space: normal;
+    text-align: start;
 }
 
 input[type="number"] {
@@ -173,25 +178,19 @@ input:focus {
     cursor: pointer;
 }
 
-/* Mobile adjustment for the 5-column row to prevent overlap */
-@media (max-width: 800px) {
-    .trans-input-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    }
-}
-
 /* ===============================
    Header Buttons Group
 ================================ */
 .header-buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     align-items: center;
     margin-inline-start: auto;
     /* RTL compatible */
 }
 
-/* زر الصفحة الرئيسية */
+/* Home button */
 .btn-home {
     background: #1e90ff;
 }
@@ -203,3 +202,35 @@ input:focus {
 #isc_res {
     color: #d63031;
 }
+
+
+@media (max-width: 800px) {
+    body {
+        padding: 12px;
+    }
+
+    .logo-section {
+        padding: 12px 14px;
+    }
+
+    .logo-section h2 {
+        font-size: 17px;
+    }
+
+    .input-dashboard,
+    .trans-input-grid {
+        padding: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    }
+
+    .results-dashboard {
+        padding: 0 14px 14px 14px;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    .btn-reset {
+        width: 100%;
+    }
+}
+
+
