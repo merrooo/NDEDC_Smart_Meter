@@ -21,6 +21,54 @@ body {
     padding: 18px;
 }
 
+/* Top tools row used in Ayat_Enter */
+.dark-toggle,
+.btn-view {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+
+.dark-toggle {
+    gap: 8px;
+    background: #eef3fb;
+    border: 1px solid #dbe4f1;
+    border-radius: 999px;
+    padding: 8px 12px;
+    cursor: pointer;
+    margin-inline-end: 10px;
+    user-select: none;
+}
+
+.dark-toggle .switch {
+    width: 38px;
+    height: 20px;
+    border-radius: 999px;
+    background: #cdd8ea;
+    position: relative;
+}
+
+.dark-toggle .switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    inset-inline-start: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .dark-toggle .switch {
+    background: #334155;
+}
+
+body.dark-mode .dark-toggle .switch::after {
+    inset-inline-start: 20px;
+}
+
 body.dark-mode {
     background: #25344a;
     color: #ffffff;
@@ -60,7 +108,7 @@ body.dark-mode {
     justify-content: space-between;
     gap: 12px;
     align-items: center;
-    margin-bottom: 42px;
+    margin-bottom: 16px;
 }
 
 /* Gap after Excel upload button on Ayat.html */
@@ -144,7 +192,7 @@ table {
 
 thead th {
     background: linear-gradient(90deg, #2563eb, #7c3aed);
-    color: #5b4c4c;
+    color: #ffffff;
     padding: 10px;
     font-size: 13px;
     font-weight: 700;
@@ -522,8 +570,20 @@ tbody tr:nth-child(odd) td {
 .table-container thead tr:first-child th {
     position: sticky;
     top: 0;
-    background: #fff;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
     z-index: 2;
+}
+
+/* Keep filter row visible below header row */
+.table-container thead tr.search-row th {
+    position: sticky;
+    top: 40px;
+    z-index: 2;
+    background: #f7f9fc;
+}
+
+body.dark-mode .table-container thead tr.search-row th {
+    background: #0f1a2d;
 }
 
 .search-row input,
@@ -556,4 +616,35 @@ tbody tr:nth-child(odd) td {
 
 .entry-card {
     margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+    .dark-toggle,
+    .btn-view {
+        width: 100%;
+        margin: 0 0 8px 0;
+    }
+
+    .controls-right,
+    .controls-left {
+        width: 100%;
+    }
+
+    .controls-right button,
+    .controls-left button {
+        width: 100%;
+    }
+
+    .pagination-controls {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .btn-pagination {
+        width: 100%;
+    }
+
+    .date-range {
+        flex-direction: column;
+    }
 }

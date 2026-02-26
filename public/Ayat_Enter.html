@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ar" dir="rtl">
 
 <head>
@@ -35,7 +35,7 @@
     </label>
 
     <button class="btn-view" onclick="window.location.href='index.html'">
-        ⬅️ الصفحة الرئيسية
+        الصفحة الرئيسية
     </button>
 
     <div class="entry-card">
@@ -43,10 +43,10 @@
 
         <div class="table-controls">
             <div class="controls-right">
-                <button class="btn-refresh" onclick="refreshDatabase()">🔄 تحديث البيانات</button>
+                <button class="btn-refresh" onclick="refreshDatabase()">تحديث البيانات</button>
             </div>
             <div class="controls-left">
-                <button class="btn-excel" onclick="exportExcel()">📊 تصدير Excel</button>
+                <button class="btn-excel" onclick="exportExcel()">تصدير Excel</button>
             </div>
         </div>
 
@@ -60,6 +60,7 @@
                         <th>الهندسة</th>
                         <th>النشاط</th>
                         <th>نوع العداد</th>
+                        <th>حالة العداد</th>
                         <th>الإجراءات</th>
                     </tr>
                     <tr class="search-row">
@@ -76,7 +77,8 @@
                         <th><input type="text" class="search-input" onkeyup="filterTable(3)" placeholder="بحث..."></th>
                         <th><input type="text" class="search-input" onkeyup="filterTable(4)" placeholder="بحث..."></th>
                         <th><input type="text" class="search-input" onkeyup="filterTable(5)" placeholder="بحث..."></th>
-                        <th><button class="btn-clear-filters" onclick="addNewRow()">➕ إضافة سجل جديد</button></th>
+                        <th><input type="text" class="search-input" onkeyup="filterTable(6)" placeholder="بحث..."></th>
+                        <th><button class="btn-clear-filters" onclick="addNewRow()">إضافةعداد</button></th>
                     </tr>
                 </thead>
                 <tbody id="comparisonTableBody">
@@ -86,11 +88,11 @@
 
         <div class="pagination-controls">
             <button id="prevBtn" class="btn-pagination" onclick="window.prevPage()" disabled>
-                ⬅️ السابق
+                السابق
             </button>
             <span id="pageInfo" class="page-info">الصفحة 1 من 1</span>
             <button id="nextBtn" class="btn-pagination" onclick="window.nextPage()" disabled>
-                التالي ➡️
+                التالي
             </button>
         </div>
 
@@ -119,7 +121,8 @@
             2: ['دمياط', 'شمال الدقهلية', 'جنوب الدقهلية', 'كفر الشيخ'],
             3: ['هندسة شمال دمياط', 'هندسة جنوب دمياط', 'هندسة عزبة البرج', 'هندسة كفر سعد', 'هندسة كفر البطيخ', 'هندسة راس البر', 'هندسة دمياط الجديدة', 'هندسة الزرقا', 'هندسة فارسكور', 'هندسة الروضة', 'هندسة الشعراء', 'هندسة مدينة شربين', 'هندسة قري شربين', 'هندسة دكرنس', 'هندسة جمصة', 'هندسة قري بلقاس', 'هندسة مدينة بلقاس', 'هندسة الستاموني', 'هندسة بني عبيد', 'هندسة منية النصر', 'هندسة ميت سلسيل', 'هندسة الجمالية', 'هندسة قري المنزلة', 'هندسة مدينة المنزلة', 'هندسة المطرية', 'هندسة شرق المنصورة', 'هندسة غرب المنصورة', 'هندسة طلخا', 'هندسة نبروه', 'هندسة قري المنصورة 1', 'هندسة قري المنصورة 2', 'هندسة اجا', 'هندسة مدينة السنبلاوين', 'هندسة قري السنبلاوين', 'هندسة تمي الامديد', 'هندسة مدينة ميت غمر', 'هندسة قري ميت غمر', 'هندسة كوم النور', 'هندسة مدينة كفر الشيخ', 'هندسة غرب كفر الشيخ', 'هندسة شرق كفر الشيخ', 'هندسة قلين', 'هندسة قرى سيدي سالم', 'هندسة مدينة سيدي سالم', 'هندسة الرياض', 'هندسة مدينة دسوق', 'هندسة قرى شمال دسوق', 'هندسة قرى جنوب دسوق', 'هندسة فوه', 'هندسة مطوبس', 'هندسة مدينة الحامول', 'هندسة قرى الحامول', 'هندسة بيلا', 'هندسة بلطيم', 'هندسة برج البرلس'],
             4: ['منزلي', 'تجاري', 'قوى محركة', 'كودي مخالف', 'ري', 'مزارع', 'مساجد', 'استثمار صناعة', 'كبار', 'مصالح حكومية', 'مصالح حكوميه اخري', 'ADD_NEW'],
-            5: ['اسكرا احادي', 'المصريه احادي', 'جلوبال ثلاثى مباشر', 'جلوبال احادي', 'جلوبال ثلاثى غير مباشر', 'ADD_NEW']
+            5: ['اسكرا احادي', 'المصريه احادي', 'جلوبال ثلاثى مباشر', 'جلوبال احادي', 'جلوبال ثلاثى غير مباشر', 'ADD_NEW'],
+            6: ['الفحص', 'التكهين','فحص الشركة المصنعة', 'ADD_NEW']
         };
 
         // Pagination state
@@ -198,12 +201,15 @@
             // استخدام رقم العداد (mno) كـ data-key بدلاً من Firebase key
             newRow.setAttribute('data-key', item.mno || key);
 
-            const fields = ['mno', 'enter_date', 'keta3', 'handsa', 'nashattype', 'mtype'];
+            const fields = ['mno', 'enter_date', 'keta3', 'handsa', 'nashattype', 'mtype','status'];
             fields.forEach((field, index) => {
                 const cell = newRow.insertCell(index);
                 cell.className = 'editable-cell';
                 if (field === 'enter_date') {
                     cell.innerText = formatDateDisplay(item[field] || '');
+                } else if (field === 'mno') {
+                    // fallback to key for old records that don't have mno stored
+                    cell.innerText = item[field] || key || '';
                 } else {
                     cell.innerText = item[field] || '';
                 }
@@ -211,10 +217,11 @@
             });
 
 
-            const actionCell = newRow.insertCell(6);
-            // استخدام mno بدلاً من key
+            const actionCell = newRow.insertCell(7);
+            // use row key to avoid undefined mno issues on old records
             actionCell.innerHTML = `
-                <button class="btn-refresh" style="padding: 4px 10px; font-size: 12px;" onclick="deleteRecord('${item.mno}')">🗑️ حذف</button>
+                <button class="btn-excel btn-edit-toggle" style="padding: 4px 10px; font-size: 12px;" onclick="toggleRowEdit(this)">تعديل</button>
+                <button class="btn-refresh" style="padding: 4px 10px; font-size: 12px;" onclick="deleteRow(this)">حـذف</button>
             `;
         }
 
@@ -228,7 +235,8 @@
         window.addNewRow = () => {
             const tbody = document.getElementById("comparisonTableBody");
             const newRow = tbody.insertRow(0);
-            for (let i = 0; i < 6; i++) {
+            newRow.setAttribute('data-editing', '1');
+            for (let i = 0; i < 7; i++) {
                 const cell = newRow.insertCell(i);
                 cell.className = 'editable-cell';
                 if (i === 1) {
@@ -240,19 +248,20 @@
                     cell.onclick = () => editCell(cell);
                 }
             }
-            const actionCell = newRow.insertCell(6);
+            const actionCell = newRow.insertCell(7);
             actionCell.innerHTML = `
-                <button class="btn-save" style="width: auto; padding: 4px 10px; font-size: 12px;" onclick="saveNewRow(this)">💾 حفظ</button>
-                <button class="btn-cancel" style="margin-inline-start:6px; padding: 4px 10px; font-size: 12px;" onclick="cancelNewRow(this)">❌ إلغاء</button>
+                <button class="btn-save" style="width: auto; padding: 4px 10px; font-size: 12px;" onclick="saveNewRow(this)">حفظ</button>
+                <button class="btn-cancel" style="margin-inline-start:6px; padding: 4px 10px; font-size: 12px;" onclick="cancelNewRow(this)">إلغاء</button>
             `;
         };
 
         // تعديل خلية مع دعم القوائم المنسدلة
         window.editCell = (cell) => {
+            const row = cell.closest('tr');
+            if (!row || row.getAttribute('data-editing') !== '1') return;
             if (cell.querySelector('input') || cell.querySelector('select')) return;
             const text = cell.innerText;
             const colIndex = cell.cellIndex;
-            const row = cell.closest('tr');
             // Prevent editing the date for existing (saved) records
             if (colIndex === 1 && row && row.getAttribute('data-key')) {
                 return;
@@ -265,7 +274,7 @@
                 input = document.createElement('input');
                 input.type = 'date';
                 input.value = parseAnyToISO(text);
-            } else if ([2, 3, 4, 5].includes(colIndex) && options[colIndex]) {
+            } else if ([2, 3, 4, 5, 6].includes(colIndex) && options[colIndex]) {
                 // أعمدة بها قوائم منسدلة
                 input = document.createElement('select');
                 input.innerHTML = '<option value="">اختر...</option>';
@@ -274,7 +283,7 @@
                     const option = document.createElement('option');
                     if (opt === 'ADD_NEW') {
                         option.value = 'ADD_NEW';
-                        option.textContent = '➕ إضافة جديد...';
+                        option.textContent = 'إضافة جديد...';
                     } else {
                         option.value = opt;
                         option.textContent = opt;
@@ -284,10 +293,10 @@
                 });
 
                 // معالجة ADD_NEW
-                if ([4, 5].includes(colIndex)) {
+                if ([4, 5 , 6].includes(colIndex)) {
                     input.onchange = () => {
                         if (input.value === 'ADD_NEW') {
-                            const promptText = colIndex === 5 ? 'أدخل نوع العداد الجديد:' : 'أدخل نوع النشاط الجديد:';
+                            const promptText = colIndex === 5 ? 'أدخل نوع العداد الجديد:' : colIndex === 6 ? 'أدخل حالة العداد الجديدة:' : 'أدخل نوع النشاط الجديد:';
                             const newVal = prompt(promptText);
                             if (newVal && newVal.trim()) {
                                 const trimmed = newVal.trim();
@@ -324,8 +333,6 @@
                     cell.innerText = input.value;
                 }
                 cell.onclick = () => editCell(cell);
-                const key = cell.closest('tr').getAttribute('data-key');
-                if (key) updateInFirebase(key, cell.closest('tr'));
             };
 
             input.onblur = saveEdit;
@@ -338,6 +345,50 @@
             };
         };
 
+        window.toggleRowEdit = (btn) => {
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isEditing = row.getAttribute('data-editing') === '1';
+
+            if (!isEditing) {
+                row.setAttribute('data-editing', '1');
+                row.querySelectorAll('td').forEach((td) => {
+                    td.style.backgroundColor = 'rgba(14, 165, 233, 0.12)';
+                });
+                btn.textContent = 'حفظ';
+                return;
+            }
+
+            // finalize any active editors before saving
+            row.querySelectorAll('td').forEach((cell) => {
+                const input = cell.querySelector('input, select');
+                if (!input) return;
+                if (cell.cellIndex === 1) {
+                    cell.innerText = formatDateDisplay(input.value);
+                } else {
+                    cell.innerText = input.value;
+                }
+                cell.onclick = () => editCell(cell);
+            });
+
+            const key = row.getAttribute('data-key') || row.cells[0]?.innerText || '';
+            updateInFirebase(key, row, true);
+
+            row.setAttribute('data-editing', '0');
+            row.querySelectorAll('td').forEach((td) => {
+                td.style.backgroundColor = '';
+            });
+            btn.textContent = 'تعديل';
+        };
+
+        window.deleteRow = (btn) => {
+            const row = btn.closest('tr');
+            if (!row) return;
+            const key = (row.getAttribute('data-key') || row.cells[0]?.innerText || '').trim();
+            deleteRecord(key);
+        };
+
         // حفظ السجل الجديد باستخدام رقم العداد كـ key
         window.saveNewRow = (btn) => {
             const row = btn.closest('tr');
@@ -348,7 +399,8 @@
                 keta3: cells[2].innerText,
                 handsa: cells[3].innerText,
                 nashattype: cells[4].innerText,
-                mtype: cells[5].innerText
+                mtype: cells[5].innerText,
+                status: cells[6].innerText
             };
 
             if (!data.mno) return Swal.fire("خطأ", "يجب إدخال رقم العداد", "error");
@@ -364,25 +416,50 @@
         };
 
         // تحديث في فيربيز باستخدام رقم العداد
-        function updateInFirebase(key, row) {
+        function updateInFirebase(key, row, showMessage = false) {
             const cells = row.cells;
-            const mno = cells[0].innerText; // استخدام رقم العداد كـ key
+            const originalKey = (key || '').trim();
+            const mno = (cells[0].innerText || '').trim(); // استخدام رقم العداد كـ key
+            if (!mno) {
+                Swal.fire("خطأ", "رقم العداد مطلوب للحفظ", "error");
+                return;
+            }
             const data = {
                 mno: mno,
                 enter_date: parseAnyToISO(cells[1].innerText),
                 keta3: cells[2].innerText,
                 handsa: cells[3].innerText,
                 nashattype: cells[4].innerText,
-                mtype: cells[5].innerText
+                mtype: cells[5].innerText,
+                status: cells[6].innerText
             };
-            // تحديث باستخدام رقم العداد
-            set(ref(db, `Ayat_Enter/${mno}`), data).then(() => {
+            const saveRecord = () => set(ref(db, `Ayat_Enter/${mno}`), data).then(() => {
                 row.setAttribute('data-key', mno);
+                if (showMessage) {
+                    Swal.fire("تم", "تم حفظ التعديل بنجاح", "success");
+                }
+            }).catch((err) => {
+                Swal.fire("خطأ", "فشل حفظ التعديل: " + err.message, "error");
             });
+
+            // إذا تغيّر رقم العداد، احذف المفتاح القديم ثم احفظ بالجديد
+            if (originalKey && originalKey !== mno) {
+                remove(ref(db, `Ayat_Enter/${originalKey}`))
+                    .then(saveRecord)
+                    .catch((err) => Swal.fire("خطأ", "فشل تحديث المفتاح: " + err.message, "error"));
+                return;
+            }
+
+            saveRecord();
         }
 
         // حذف سجل باستخدام رقم العداد
         window.deleteRecord = (key) => {
+            const safeKey = (key || '').trim();
+            if (!safeKey) {
+                Swal.fire("خطأ", "لا يمكن حذف سجل بدون رقم عداد", "error");
+                return;
+            }
             Swal.fire({
                 title: "هل أنت متأكد؟",
                 icon: "warning",
@@ -390,9 +467,11 @@
                 confirmButtonText: "نعم، احذف"
             }).then((res) => {
                 if (res.isConfirmed) {
-                    remove(ref(db, `Ayat_Enter/${key}`)).then(() => {
+                    remove(ref(db, `Ayat_Enter/${safeKey}`)).then(() => {
                         Swal.fire("تم", "تم الحذف بنجاح", "success");
                         loadAyatEnterData();
+                    }).catch((err) => {
+                        Swal.fire("خطأ", "فشل الحذف: " + err.message, "error");
                     });
                 }
             });
@@ -410,7 +489,7 @@
         };
 
         function updatePaginationControls() {
-            // enforce a minimum of 5 rows per page
+            // enforce a minimum of 8 rows per page
             const effectiveItemsPerPage = Math.max(8, (typeof itemsPerPage === 'number' ? itemsPerPage : 8));
             const totalItems = Array.isArray(filteredData) ? filteredData.length : document.querySelectorAll('#comparisonTableBody tr').length;
             const totalPages = Math.max(1, Math.ceil(totalItems / effectiveItemsPerPage));
@@ -457,6 +536,7 @@
             const q3 = document.querySelector('.search-row')?.children[3]?.querySelector('.search-input')?.value.toLowerCase() || '';
             const q4 = document.querySelector('.search-row')?.children[4]?.querySelector('.search-input')?.value.toLowerCase() || '';
             const q5 = document.querySelector('.search-row')?.children[5]?.querySelector('.search-input')?.value.toLowerCase() || '';
+            const q6 = document.querySelector('.search-row')?.children[6]?.querySelector('.search-input')?.value.toLowerCase() || '';
 
             filteredData = allData.filter(item => {
                 // date
@@ -474,6 +554,7 @@
                 if (q3 && !(String(item.handsa || '').toLowerCase().includes(q3))) return false;
                 if (q4 && !(String(item.nashattype || '').toLowerCase().includes(q4))) return false;
                 if (q5 && !(String(item.mtype || '').toLowerCase().includes(q5))) return false;
+                if (q6 && !(String(item.status || '').toLowerCase().includes(q6))) return false;
                 return true;
             });
 
@@ -493,3 +574,5 @@
 </body>
 
 </html>
+
+
